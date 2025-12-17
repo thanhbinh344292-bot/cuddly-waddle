@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThanhBinh49</title>
+<link rel="stylesheet" href="style.css">
+<script defer src="app.js"></script>
+</head>
+<body>
+
+<h2>ThanhBinh49 - Mini TikTok Photo Editor</h2>
+
+<input type="file" id="imageInput" accept="image/*"><br>
+
+<label>TikTok Boost 🔥</label>
+<input type="range" id="boostSlider" min="0" max="100" value="30"><br>
+
+<label>Preset:</label>
+<select id="presetSelect">
+  <option value="none">None</option>
+  <option value="bright">Bright</option>
+  <option value="warm">Warm</option>
+  <option value="chill">Chill</option>
+  <option value="fantasy">Fantasy</option>
+</select><br>
+
+<label><input type="checkbox" id="autoFace"> Auto chỉnh mặt + eo</label><br>
+<label><input type="checkbox" id="autoLight"> Auto ngược sáng</label><br>
+
+<canvas id="canvas"></canvas><br>
+<button id="saveBtn">💾 Lưu Ảnh</button>
+
+</body>
+</html>
