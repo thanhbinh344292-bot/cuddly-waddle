@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEST CUỐI</title>
+    <style>
+        body { background: #000; color: #fff; text-align: center; }
+        canvas { border: 2px solid #fff; max-width: 90%; }
+        button { padding: 20px; margin: 10px; font-size: 20px; background: red; color: white; }
+    </style>
+</head>
+<body>
+    <h1>TEST ĐỘ SÁNG</h1>
+    <input type="file" id="f" onchange="ld(event)">
+    <br>
+    <canvas id="c"></canvas>
+    <br>
+    <button onclick="b()">BẤM ĐÂY ĐỂ BOOST</button>
+
+    <script>
+        const cv = document.getElementById('c'), x = cv.getContext('2d');
+        let o = null;
+        function ld(e) {
+            const r = new FileReader();
+            r.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    cv.width = img.width; cv.height = img.height;
+                    x.drawImage(img, 0, 0); o = img;
+                    alert("Đã nhận ảnh!");
+                };
+                img.src = ev.target.result;
+            };
+            r.readAsDataURL(e.target.files[0]);
+        }
+        function b() {
+            if(!o) return alert("Chưa chọn ảnh!");
+            // Cách làm sáng thô thiển nhất: Vẽ đè một lớp trắng mờ lên
+            x.globalAlpha = 0.5;
+            x.fillStyle = "white";
+            x.fillRect(0, 0, cv.width, cv.height);
+            x.globalAlpha = 1.0;
+            alert("Nó có trắng lên tí nào không sếp?");
+        }
+    </script>
+</body>
+</html>
