@@ -2,101 +2,45 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>THANHBINH49 AI PRO</title>
+    <title>TEST TB49</title>
     <style>
-        body { margin: 0; background: #000; color: #fff; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; }
-        header { padding: 15px; text-align: center; color: #007aff; font-weight: 900; border-bottom: 1px solid #333; letter-spacing: 1px; }
-        #view { flex: 1; display: flex; align-items: center; justify-content: center; background: #111; overflow: hidden; position: relative; }
-        canvas { max-width: 98%; max-height: 98%; border-radius: 5px; box-shadow: 0 0 20px #000; }
-        .toolbar { padding: 12px; display: flex; gap: 10px; overflow-x: auto; background: #050505; border-bottom: 1px solid #333; }
-        button { background: #222; color: #fff; border: 1px solid #444; padding: 12px 18px; border-radius: 10px; white-space: nowrap; font-size: 14px; font-weight: 600; }
-        button:active { background: #007aff; border-color: #007aff; }
-        #chat { height: 180px; background: #111; display: flex; flex-direction: column; }
-        #log { flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; line-height: 1.5; color: #ccc; }
-        .input-box { display: flex; padding: 10px; gap: 8px; border-top: 1px solid #333; background: #000; }
-        input { flex: 1; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 10px; outline: none; }
+        body { background: #000; color: #fff; text-align: center; }
+        canvas { border: 2px solid #fff; max-width: 90%; margin-top: 20px; }
+        .btns { margin: 20px; }
+        button { padding: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <header>THANHBINH49 AI PRO</header>
-    <div id="view"><canvas id="c"></canvas></div>
-    <div class="toolbar">
-        <button onclick="document.getElementById('file').click()">📂 Mở Ảnh</button>
-        <button onclick="f('contrast(1.6) saturate(1.5)')">🔥 Boost</button>
-        <button onclick="f('sepia(0.7) brightness(1.2)')">🍂 Warm</button>
-        <button onclick="f('hue-rotate(180deg)')">🦄 Magic</button>
-        <button onclick="res()">🔄 Reset</button>
-        <button onclick="save()" style="background:#007aff; border:none">💾 Lưu</button>
+    <h1>THANHBINH49 TEST</h1>
+    <div class="btns">
+        <button onclick="document.getElementById('i').click()">1. CHỌN ẢNH</button>
+        <button onclick="b()">2. BẤM BOOST (LÀM SÁNG)</button>
     </div>
-    <input type="file" id="file" hidden accept="image/*" onchange="ld(event)">
-    <div id="chat">
-        <div id="log"><b>AI:</b> Chào sếp Bình! Sếp mở ảnh hoặc gõ "Vẽ một cô gái" xem sao.</div>
-        <div class="input-box">
-            <input type="text" id="msg" placeholder="Lệnh vẽ hoặc chat...">
-            <button onclick="go()" style="border-radius:50%; width:45px; height:45px; padding:0">🚀</button>
-        </div>
-    </div>
-<script>
-    const cv = document.getElementById('c'), x = cv.getContext('2d');
-    let ori = null;
+    <input type="file" id="i" hidden onchange="l(event)">
+    <canvas id="c"></canvas>
 
-    function ld(e) {
-        const r = new FileReader();
-        r.onload = (ev) => {
-            const img = new Image();
-            img.onload = () => {
-                cv.width = img.width; cv.height = img.height;
-                x.filter = 'none'; x.drawImage(img, 0, 0); ori = img;
-                msg("AI", "Đã nhận ảnh, mời sếp thi triển!");
+    <script>
+        const cv = document.getElementById('c'), x = cv.getContext('2d');
+        let o = null;
+        function l(e) {
+            const r = new FileReader();
+            r.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    cv.width = img.width; cv.height = img.height;
+                    x.drawImage(img, 0, 0); o = img;
+                    alert("Đã nhận ảnh! Giờ bấm nút Boost đi sếp.");
+                };
+                img.src = ev.target.result;
             };
-            img.src = ev.target.result;
-        };
-        r.readAsDataURL(e.target.files[0]);
-    }
-
-    function f(v) {
-        if(!ori) return msg("AI", "Chưa có ảnh sếp ơi!");
-        x.clearRect(0, 0, cv.width, cv.height);
-        x.filter = v; x.drawImage(ori, 0, 0);
-        msg("AI", "Xong! Nhìn ảo ma chưa?");
-    }
-
-    function res() { if(ori) { x.filter='none'; x.drawImage(ori, 0, 0); msg("AI", "Về zin!"); } }
-
-    function save() {
-        const a = document.createElement('a');
-        a.download = 'TB49.png'; a.href = cv.toDataURL(); a.click();
-    }
-
-    async function go() {
-        const i = document.getElementById('msg'), v = i.value.trim();
-        if(!v) return; msg("Sếp", v); i.value = '';
-        if(v.toLowerCase().includes("vẽ")) {
-            msg("AI", "Đang múa cọ, sếp chờ tí...");
-            const ai = new Image(); ai.crossOrigin = "anonymous";
-            ai.src = "https://pollinations.ai/p/" + encodeURIComponent(v) + "?seed=" + Math.random();
-            ai.onload = () => {
-                cv.width = 1024; cv.height = 1024;
-                x.filter = 'none'; x.drawImage(ai, 0, 0); ori = ai;
-                msg("AI", "Xong rồi nè sếp!");
-                speak("Xong rồi sếp ơi");
-            };
-        } else {
-            msg("AI", "Dạ, em nghe nè sếp Bình đẹp trai!");
+            r.readAsDataURL(e.target.files[0]);
         }
-    }
-
-    function msg(s, m) {
-        const l = document.getElementById('log');
-        l.innerHTML += `<div><b>${s}:</b> ${m}</div>`;
-        l.scrollTop = l.scrollHeight;
-    }
-
-    function speak(t) {
-        const u = new SpeechSynthesisUtterance(t);
-        u.lang = 'vi-VN'; window.speechSynthesis.speak(u);
-    }
-</script>
+        function b() {
+            if(!o) return alert("Sếp chưa chọn ảnh mà!");
+            x.filter = "brightness(2) contrast(1.5)";
+            x.drawImage(o, 0, 0);
+            alert("Đã Boost! Ảnh có sáng lên không sếp?");
+        }
+    </script>
 </body>
 </html>
