@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TB49 FINAL FIX</title>
+    <style>
+        body { background: #000; color: #fff; text-align: center; font-family: sans-serif; }
+        canvas { border: 2px solid #007aff; max-width: 95%; margin-top: 10px; background: #111; }
+        button { padding: 15px; margin: 5px; border-radius: 10px; font-weight: bold; font-size: 16px; }
+        .btn-open { background: #444; color: white; }
+        .btn-boost { background: #ffcc00; color: black; border: none; }
+    </style>
+</head>
+<body>
+    <h2>THANHBINH49 AI PRO</h2>
+    <input type="file" id="f" hidden onchange="ld(event)">
+    <button class="btn-open" onclick="document.getElementById('f').click()">1. CHỌN ẢNH</button>
+    <button class="btn-boost" onclick="b()">2. BOOST (ÉP SÁNG)</button>
+    <br>
+    <canvas id="c"></canvas>
+
+    <script>
+        const cv = document.getElementById('c'), x = cv.getContext('2d');
+        let o = null;
+
+        function ld(e) {
+            const r = new FileReader();
+            r.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    // Ép iPhone không được dùng ảnh quá to
+                    cv.width = 800; 
+                    cv.height = (img.height / img.width) * 800;
+                    x.drawImage(img, 0, 0, cv.width, cv.height);
+                    o = img;
+                    alert("Đã hiện ảnh! Giờ sếp bấm BOOST đi.");
+                };
+                img.src = ev.target.result;
+            };
+            r.readAsDataURL(e.target.files[0]);
+        }
+
+        function b() {
+            if(!o) return alert("Sếp chưa chọn ảnh!");
+            
+            // CHIÊU CUỐI: Vẽ đè một lớp trắng mờ 50% để CHẮC CHẮN nó phải sáng lên
+            x.globalCompositeOperation = "lighter";
+            x.fillStyle = "rgba(255, 255, 255, 0.5)"; 
+            x.fillRect(0, 0, cv.width, cv.height);
+            x.globalCompositeOperation = "source-over";
+            
+            alert("Tui vừa đổ một xô sơn trắng lên ảnh đó, thấy sáng chưa sếp?");
+        }
+    </script>
+</body>
+</html>
