@@ -2,44 +2,59 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>TEST TB49</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TB49 FIX</title>
     <style>
-        body { background: #000; color: #fff; text-align: center; }
-        canvas { border: 2px solid #fff; max-width: 90%; margin-top: 20px; }
-        .btns { margin: 20px; }
-        button { padding: 15px; font-weight: bold; }
+        body { background: #000; color: #fff; text-align: center; font-family: sans-serif; }
+        #v { height: 60vh; display: flex; align-items: center; justify-content: center; background: #111; margin: 10px; border-radius: 10px; }
+        canvas { max-width: 100%; max-height: 100%; }
+        button { padding: 15px; margin: 5px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; }
+        button:active { background: #007aff; }
     </style>
 </head>
 <body>
-    <h1>THANHBINH49 TEST</h1>
-    <div class="btns">
+    <div id="v"><canvas id="c"></canvas></div>
+    <div style="padding:10px;">
         <button onclick="document.getElementById('i').click()">1. CHỌN ẢNH</button>
-        <button onclick="b()">2. BẤM BOOST (LÀM SÁNG)</button>
+        <button onclick="b()" style="background:#ff2d55; border:none;">2. BOOST (LÀM SÁNG)</button>
+        <button onclick="location.reload()" style="background:#444;">3. TẢI LẠI TRANG</button>
     </div>
     <input type="file" id="i" hidden onchange="l(event)">
-    <canvas id="c"></canvas>
 
     <script>
         const cv = document.getElementById('c'), x = cv.getContext('2d');
         let o = null;
+
         function l(e) {
             const r = new FileReader();
             r.onload = (ev) => {
                 const img = new Image();
                 img.onload = () => {
-                    cv.width = img.width; cv.height = img.height;
-                    x.drawImage(img, 0, 0); o = img;
-                    alert("Đã nhận ảnh! Giờ bấm nút Boost đi sếp.");
+                    // Fix lỗi iPhone không render canvas lớn
+                    const max = 1500;
+                    let w = img.width, h = img.height;
+                    if(w > max || h > max) {
+                        const s = Math.min(max/w, max/h);
+                        w *= s; h *= s;
+                    }
+                    cv.width = w; cv.height = h;
+                    x.filter = 'none';
+                    x.drawImage(img, 0, 0, w, h);
+                    o = img;
+                    alert("Đã nhận ảnh! Bấm nút đỏ xem nó sáng không sếp.");
                 };
                 img.src = ev.target.result;
             };
             r.readAsDataURL(e.target.files[0]);
         }
+
         function b() {
-            if(!o) return alert("Sếp chưa chọn ảnh mà!");
-            x.filter = "brightness(2) contrast(1.5)";
-            x.drawImage(o, 0, 0);
-            alert("Đã Boost! Ảnh có sáng lên không sếp?");
+            if(!o) return alert("Sếp chưa chọn ảnh!");
+            // Ép trình duyệt vẽ lại từ đầu với filter
+            x.clearRect(0, 0, cv.width, cv.height);
+            x.filter = "brightness(2) contrast(1.2)";
+            x.drawImage(o, 0, 0, cv.width, cv.height);
+            x.filter = "none"; // Trả lại filter cho lần sau
         }
     </script>
 </body>
