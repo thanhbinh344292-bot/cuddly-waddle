@@ -3,48 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TB49 AI - MẮT THẦN</title>
+    <title>TB49 TIKTOK AI</title>
     <style>
-        body { margin: 0; background: #000; color: #fff; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        .nav { background: #111; border-bottom: 2px solid #222; padding: 10px 0; z-index: 10; }
-        header { text-align: center; color: #007aff; font-weight: 800; margin-bottom: 8px; font-size: 1.2rem; }
-        .tools { display: flex; gap: 8px; overflow-x: auto; padding: 0 10px; }
-        #v { flex: 1; display: flex; align-items: center; justify-content: center; background: #050505; position: relative; padding: 5px; }
-        canvas { max-width: 100%; max-height: 100%; border-radius: 10px; border: 1px solid #333; box-shadow: 0 0 20px rgba(0,122,255,0.2); }
-        #loading { position: absolute; display: none; color: #007aff; background: rgba(0,0,0,0.9); padding: 15px; border-radius: 10px; border: 1px solid #007aff; z-index: 20; font-weight: bold; }
-        #chat { height: 180px; background: #000; border-top: 2px solid #222; display: flex; flex-direction: column; }
-        #log { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; color: #ccc; }
-        .in-box { display: flex; padding: 10px; gap: 8px; background: #111; }
-        button { background: #222; color: #fff; border: 1px solid #444; padding: 10px 15px; border-radius: 10px; font-weight: bold; white-space: nowrap; }
-        input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; outline: none; font-size: 16px; }
+        :root { --primary: #fe2c55; --secondary: #25f4ee; --bg: #000; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'SF Pro Display', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* Giao diện Header TikTok */
+        .header { display: flex; justify-content: space-between; padding: 15px; align-items: center; border-bottom: 1px solid #222; }
+        .logo { font-weight: 900; font-size: 1.2rem; letter-spacing: -1px; }
+        .logo span { color: var(--primary); text-shadow: 2px 0 var(--secondary); }
+
+        /* Khu vực hiển thị ảnh chính */
+        #v { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; background: #0a0a0a; }
+        canvas { max-width: 95%; max-height: 95%; border-radius: 12px; transition: all 0.3s; box-shadow: 0 0 30px rgba(254, 44, 85, 0.2); }
+
+        /* Thanh công cụ Filter trượt ngang kiểu TikTok */
+        .filter-bar { display: flex; gap: 15px; overflow-x: auto; padding: 15px; background: rgba(0,0,0,0.8); }
+        .f-item { min-width: 70px; text-align: center; font-size: 11px; color: #aaa; }
+        .f-btn { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #333; margin-bottom: 5px; background-size: cover; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .f-btn:active { border-color: var(--primary); color: var(--primary); }
+
+        /* Khung Chat đàm thoại */
+        #chat { height: 200px; background: #111; border-top-left-radius: 20px; border-top-right-radius: 20px; display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom); }
+        #log { flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; color: #eee; }
+        .in-box { display: flex; padding: 10px 15px; gap: 10px; align-items: center; }
+        input { flex: 1; background: #2a2a2a; border: none; color: #fff; padding: 12px 20px; border-radius: 25px; outline: none; }
+        .btn-send { background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; }
+
+        /* Nút Tự Hủy đỏ chót */
+        .boom-float { position: absolute; right: 10px; top: 10px; background: rgba(255,0,0,0.7); padding: 8px; border-radius: 50%; border: none; color: white; font-size: 12px; z-index: 100; }
     </style>
 </head>
 <body>
-    <div class="nav">
-        <header>THANHBINH49 AI PRO</header>
-        <div class="tools">
-            <button onclick="document.getElementById('f').click()">📂 MỞ</button>
-            <button onclick="ef(1.5)" style="color:#ffcc00">🔥 BOOST</button>
-            <button onclick="boom()" style="background:#ff3b30; border:none">☢️ TỰ HỦY</button>
-            <button onclick="rs()">🔄 RESET</button>
-            <button onclick="sv()" style="background:#007aff; border:none">💾 LƯU</button>
-        </div>
+    <div class="header">
+        <div class="logo">TB49 <span>PRO AI</span></div>
+        <button onclick="document.getElementById('f').click()" style="background:none; border:1px solid #444; color:#fff; border-radius:5px; padding:5px 10px;">+ TẢI ẢNH</button>
     </div>
+
     <div id="v">
+        <button class="boom-float" onclick="boom()">☢️</button>
         <canvas id="c"></canvas>
-        <div id="loading">🔮 ĐANG SOI MẮT THẦN...</div>
+        <input type="file" id="f" hidden onchange="ld(event)">
     </div>
-    <input type="file" id="f" hidden onchange="ld(event)">
+
+    <div class="filter-bar">
+        <div class="f-item" onclick="applyFilter('normal')"><div class="f-btn">Gốc</div>Normal</div>
+        <div class="f-item" onclick="applyFilter('bright')"><div class="f-btn" style="color:#ffcc00">Sáng</div>Bright</div>
+        <div class="f-item" onclick="applyFilter('bw')"><div class="f-btn" style="color:#888">B&W</div>Vintage</div>
+        <div class="f-item" onclick="applyFilter('warm')"><div class="f-btn" style="color:#ff7e5f">Ấm</div>Warm</div>
+        <div class="f-item" onclick="applyFilter('cool')"><div class="f-btn" style="color:#00c6ff">Lạnh</div>Cool</div>
+        <div class="f-item" onclick="sv()"><div class="f-btn" style="background:var(--primary)">💾</div>Lưu</div>
+    </div>
+
     <div id="chat">
-        <div id="log">AI: Đã sẵn sàng! Sếp thử vẽ lại "xe ngựa" xem nào.</div>
+        <div id="log">AI: Sếp ơi, đàm thoại với em hoặc gõ "vẽ..." để em múa cọ!</div>
         <div class="in-box">
-            <input type="text" id="m" placeholder="Vẽ 'xe ngựa' hoặc chat...">
-            <button onclick="go()" style="background:#007aff; border:none; width:50px; border-radius:10px">🚀</button>
+            <input type="text" id="m" placeholder="Hỏi Gemini hoặc yêu cầu vẽ...">
+            <button onclick="go()" class="btn-send">🚀</button>
         </div>
     </div>
+
 <script>
     const API_KEY = "AIzaSyAosEJtRm3eHM-zVmsIzAMfipoU3v9wEek";
-    const cv = document.getElementById('c'), x = cv.getContext('2d'), ldBox = document.getElementById('loading');
+    const cv = document.getElementById('c'), x = cv.getContext('2d');
     let ori = null;
 
     function ld(e) {
@@ -52,46 +73,46 @@
         r.onload = (ev) => {
             const img = new Image();
             img.onload = () => {
-                const ratio = Math.min(window.innerWidth/img.width, 800/img.height, 1);
+                const ratio = Math.min(window.innerWidth/img.width, 400/img.height, 1);
                 cv.width = img.width * ratio; cv.height = img.height * ratio;
                 x.drawImage(img, 0, 0, cv.width, cv.height); ori = img;
+                msg("AI", "Đã tải ảnh! Sếp chọn Filter hay muốn AI sửa?");
             };
             img.src = ev.target.result;
         };
         r.readAsDataURL(e.target.files[0]);
     }
 
-    function ef(t) {
+    function applyFilter(type) {
         if(!ori) return;
         x.drawImage(ori, 0, 0, cv.width, cv.height);
         const d = x.getImageData(0,0,cv.width,cv.height), data = d.data;
-        for(let i=0; i<data.length; i+=4){ data[i]*=t; data[i+1]*=t; data[i+2]*=t; }
-        x.putImageData(d,0,0);
+        for(let i=0; i<data.length; i+=4) {
+            if(type === 'bright') { data[i]*=1.2; data[i+1]*=1.2; data[i+2]*=1.2; }
+            if(type === 'bw') { let avg = (data[i]+data[i+1]+data[i+2])/3; data[i]=data[i+1]=data[i+2]=avg; }
+            if(type === 'warm') { data[i]*=1.2; data[i+2]*=0.8; }
+            if(type === 'cool') { data[i]*=0.8; data[i+2]*=1.2; }
+        }
+        x.putImageData(d, 0, 0);
     }
 
-    function boom() { if(confirm("Xóa sạch nhé sếp?")) { x.clearRect(0,0,cv.width,cv.height); ori=null; msg("AI","Bùm!"); } }
-    function rs() { if(ori) x.drawImage(ori,0,0,cv.width,cv.height); }
-    function sv() { const a=document.createElement('a'); a.download='tb49.png'; a.href=cv.toDataURL(); a.click(); }
+    function boom() { if(confirm("Tự hủy toàn bộ?")) { x.clearRect(0,0,cv.width,cv.height); ori=null; msg("AI", "Bùm! Đã xóa dấu vết."); } }
+    function sv() { const a=document.createElement('a'); a.download='tb49_tiktok.png'; a.href=cv.toDataURL(); a.click(); }
 
     async function go() {
         const i = document.getElementById('m'), v = i.value.trim();
         if(!v) return; msg("Sếp", v); i.value = '';
-        ldBox.style.display = "block";
 
         if(v.toLowerCase().includes("vẽ")) {
-            // FIX LỖI VẼ SAI: Thêm từ khóa tiếng Anh ẩn để AI hiểu rõ hơn
-            const prompt = encodeURIComponent(v + ", hyper-realistic, highly detailed, centered composition");
+            msg("AI", "Đang múa bút kiểu TikTok...");
             const aimg = new Image(); aimg.crossOrigin = "anonymous";
-            aimg.src = `https://image.pollinations.ai/prompt/${prompt}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random()*1e9)}`;
-            
+            aimg.src = `https://pollinations.ai/p/${encodeURIComponent(v + ", portrait, tiktok style, 4k") }?width=800&height=1200&model=flux&seed=${Math.random()}`;
             aimg.onload = () => {
-                cv.width = 1024; cv.height = 1024;
-                x.drawImage(aimg, 0, 0, 1024, 1024); ori = aimg;
-                ldBox.style.display = "none"; msg("AI", "Lần này chắc chắn là " + v + "!");
+                cv.width = 800; cv.height = 1200;
+                x.drawImage(aimg, 0, 0, 800, 1200); ori = aimg;
+                msg("AI", "Ảnh AI cực phẩm cho sếp!");
             };
-            aimg.onerror = () => { ldBox.style.display = "none"; msg("AI", "Lỗi rồi sếp!"); };
         } else {
-            // GEMINI CHAT
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
                     method: 'POST',
@@ -100,15 +121,17 @@
                 });
                 const data = await res.json();
                 const reply = data.candidates[0].content.parts[0].text;
-                ldBox.style.display = "none";
                 msg("AI", reply);
-            } catch (err) { ldBox.style.display = "none"; msg("AI", "Lỗi kết nối!"); }
+                // Đàm thoại bằng giọng nói
+                const s = new SpeechSynthesisUtterance(reply.substring(0, 150));
+                s.lang = 'vi-VN'; window.speechSynthesis.speak(s);
+            } catch (err) { msg("AI", "Gemini đang bận sếp ơi!"); }
         }
     }
 
     function msg(s, m) {
         const l = document.getElementById('log');
-        l.innerHTML += `<div><b>${s}:</b> ${m}</div>`;
+        l.innerHTML += `<div><b style="color:var(--secondary)">${s}:</b> ${m}</div>`;
         l.scrollTop = l.scrollHeight;
     }
 </script>
