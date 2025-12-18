@@ -10,12 +10,12 @@
 <style>
 *{box-sizing:border-box;}
 body{margin:0;font-family:'Inter',sans-serif;background:#121212;color:white;display:flex;flex-direction:column;height:100vh;}
-header{padding:14px 20px;text-align:center;font-weight:700;font-size:1.5rem;background:linear-gradient(135deg,#6366f1,#22d3ee);box-shadow:0 4px 12px rgba(0,0,0,0.3);}
-main{flex:1;display:flex;flex-direction:row;gap:10px;padding:10px;}
-#sidebar-left,#sidebar-right{width:80px;min-width:80px;background:#1E1E2F;border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:10px;overflow:auto;}
+header{padding:16px;text-align:center;font-weight:700;font-size:1.6rem;background:linear-gradient(135deg,#6366f1,#22d3ee);box-shadow:0 4px 12px rgba(0,0,0,0.3);}
+main{flex:1;display:flex;gap:10px;padding:10px;}
+#sidebar-left,#sidebar-right{width:90px;min-width:90px;background:#1E1E2F;border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:10px;overflow:auto;}
 #canvas-container{flex:1;display:flex;justify-content:center;align-items:center;position:relative;}
 canvas{border-radius:16px;max-width:100%;max-height:80vh;box-shadow:0 10px 20px rgba(0,0,0,0.5);}
-button,input[type=range],input[type=text]{border:none;border-radius:12px;padding:8px;font-size:0.95rem;cursor:pointer;transition:0.2s;}
+button,input[type=range],input[type=text],select{border:none;border-radius:12px;padding:8px;font-size:0.95rem;cursor:pointer;transition:0.2s;}
 button{background:linear-gradient(135deg,#6366f1,#22d3ee);color:white;font-weight:600;}
 button:hover{opacity:0.9;}
 input[type=range]{width:60px;transform:rotate(-90deg);margin:auto;}
@@ -24,22 +24,30 @@ input[type=range]{width:60px;transform:rotate(-90deg);margin:auto;}
 #chat-box div{margin-bottom:6px;font-size:0.9rem;}
 </style>
 </head>
-
 <body>
+
 <header>ThanhBinh49 AI Pro</header>
+
 <main>
   <div id="sidebar-left">
-    <input type="file" id="fileInput" accept="image/*" title="Upload ảnh">
-    <input type="range" id="brightness" min="50" max="150" value="100" title="Brightness">
-    <input type="range" id="contrast" min="50" max="150" value="100" title="Contrast">
-    <button onclick="applyFilters()">Áp dụng</button>
-    <button onclick="downloadImage()">Lưu</button>
+    <input type="file" id="imageInput" accept="image/*" title="Upload ảnh">
+    <select id="presetSelect">
+      <option value="">Preset</option>
+      <option value="bright">Bright</option>
+      <option value="warm">Warm</option>
+      <option value="chill">Chill</option>
+      <option value="fantasy">Fantasy</option>
+    </select>
+    <input type="range" id="boostSlider" min="0" max="100" value="50" title="Boost">
+    <label><input type="checkbox" id="autoFace"> AutoFace</label>
+    <label><input type="checkbox" id="autoLight"> AutoLight</label>
+    <button id="saveBtn">Lưu</button>
   </div>
 
   <div id="canvas-container">
-    <canvas id="editor"></canvas>
+    <canvas id="canvas"></canvas>
     <div id="sidebar-right">
-      <input type="text" id="textPrompt" placeholder="Mô tả tạo ảnh AI">
+      <input type="text" id="textPrompt" placeholder="Nhập mô tả tạo ảnh AI">
       <button onclick="generateFromText()">Tạo ảnh</button>
       <div id="chat-box">
         <input id="chat-input" placeholder="Nhập chat AI..." onkeydown="if(event.key==='Enter'){sendChat()}">
@@ -50,46 +58,74 @@ input[type=range]{width:60px;transform:rotate(-90deg);margin:auto;}
 </main>
 
 <script>
-const canvas=document.getElementById('editor');
-const ctx=canvas.getContext('2d');
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+const imageInput=document.getElementById("imageInput");
+const boostSlider=document.getElementById("boostSlider");
+const presetSelect=document.getElementById("presetSelect");
+const saveBtn=document.getElementById("saveBtn");
+const autoFace=document.getElementById("autoFace");
+const autoLight=document.getElementById("autoLight");
+
 let img=new Image();
 
-document.getElementById('fileInput').onchange=e=>{
+imageInput.onchange=(e)=>{
   const file=e.target.files[0];
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    img.onload=()=>{
-      canvas.width=img.width>600?600:img.width;
-      canvas.height=img.height>600?600:img.height;
-      ctx.drawImage(img,0,0,canvas.width,canvas.height);
-    };
-    img.src=ev.target.result;
-  };
-  reader.readAsDataURL(file);
+  if(!file) return;
+  img.src=URL.createObjectURL(file);
 };
 
-function applyFilters(){
+img.onload=()=>{
+  canvas.width=img.width>600?600:img.width;
+  canvas.height=img.height>600?600:img.height;
+  drawImage();
+};
+
+function drawImage(){
   if(!img.src) return;
-  ctx.drawImage(img,0,0);
-  let data=ctx.getImageData(0,0,canvas.width,canvas.height);
-  let b=document.getElementById('brightness').value/100;
-  let c=document.getElementById('contrast').value/100;
-  for(let i=0;i<data.data.length;i+=4){
-    data.data[i]*=b;
-    data.data[i+1]*=b;
-    data.data[i+2]*=b;
-    data.data[i]=((data.data[i]-128)*c)+128;
-    data.data[i+1]=((data.data[i+1]-128)*c)+128;
-    data.data[i+2]=((data.data[i+2]-128)*c)+128;
+  let boost=+boostSlider.value;
+  let b=0,c=0,s=0;
+
+  switch(presetSelect.value){
+    case "bright": b=10; c=10; s=5; break;
+    case "warm": b=5; c=5; s=15; break;
+    case "chill": b=0; c=-5; s=-10; break;
+    case "fantasy": b=15; c=20; s=25; break;
   }
-  ctx.putImageData(data,0,0);
+
+  const brightness=100+boost*0.18+b;
+  const contrast=100+boost*0.28+c;
+  const saturate=100+boost*0.22+s;
+
+  ctx.filter=`brightness(${brightness}%) contrast(${contrast}%) saturate(${saturate}%)`;
+  ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
+  if(autoFace.checked) slimFace();
+  if(autoLight.checked) lightBoost();
 }
 
-function downloadImage(){
-  const a=document.createElement('a');
-  a.href=canvas.toDataURL();
-  a.download='ThanhBinh49.png';
-  a.click();
+boostSlider.oninput=drawImage;
+presetSelect.onchange=drawImage;
+
+saveBtn.onclick=()=>{
+  const link=document.createElement("a");
+  link.download="ThanhBinh49.png";
+  link.href=canvas.toDataURL("image/png");
+  link.click();
+};
+
+function slimFace(){
+  ctx.save();
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.scale(0.95,0.95);
+  ctx.drawImage(img,0,0,canvas.width,canvas.height);
+  ctx.restore();
+}
+
+function lightBoost(){
+  ctx.globalCompositeOperation="lighter";
+  ctx.drawImage(canvas,0,0);
+  ctx.globalCompositeOperation="source-over";
 }
 
 // AI Proxy URL
@@ -139,5 +175,6 @@ async function sendChat(){
   }catch(e){alert('Lỗi chat AI: '+e.message);}
 }
 </script>
+
 </body>
 </html>
