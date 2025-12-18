@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>TB49 ULTRA AI • Web Photo Editor</title>
+
+<!-- AI -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-detection"></script>
+
+<style>
+:root{--p:#00ff88;--bg:#0a0a0a}
+*{box-sizing:border-box}
+body{
+ margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI;
+ background:var(--bg);color:#fff;
+ display:flex;flex-direction:column;height:100vh;overflow:hidden
+}
+#vp{
+ flex:1;display:flex;align-items:center;justify-content:center;
+ background:#000;position:relative
+}
+canvas{
+ max-width:95%;max-height:82%;
+ border:1px solid #333;
+ box-shadow:0 0 30px rgba(0,255,136,.25);
+ image-rendering:auto;
+ touch-action:none
+}
+#msg{
+ position:absolute;top:10px;
+ color:var(--p);font-size:12px;font-weight:700
+}
+.controls{
+ background:#151515;padding:18px;
+ border-top:2px solid var(--p);
+ border-radius:22px 22px 0 0
+}
+.sliders{
+ display:grid;grid-template-columns:1fr 1fr;
+ gap:12px;margin-bottom:12px
+}
+label{font-size:10px;color:var(--p);letter-spacing:1px}
+input[type=range]{
+ width:100%;accent-color:var(--p);
+ touch-action:pan-x
+}
+.btns{display:flex;gap:10px}
+.btn{
+ flex:1;padding:14px;border-radius:14px;
+ border:none;font-weight:900;cursor:pointer
+}
+.up{background:#333;color:#fff}
+.ai{background:#1a1a1a;color:var(--p);border:1px solid var(--p)}
+.dl{background:var(--p);color:#000}
+</style>
+</head>
+
+<body>
+
+<div id="vp">
+ <div id="msg">ĐANG TẢI AI…</div>
+ <canvas id="cv"></canvas>
+</div>
+
+<div class="controls">
+ <div class="sliders">
+  <div><label>SÁNG</label><input id="br" type="range" min="85" max="135" value="100" oninput="draw()"></div>
+  <div><label>TƯƠNG PHẢN</label><input id="ct" type="range" min="85" max="135" value="100" oninput="draw()"></div>
+  <div><label>MÀU</label><input id="sa" type="range" min="85" max="150" value="100" oninput="draw()"></div>
+  <div><label>HOÀI CỔ</label><input id="sp" type="range" min="0" max="30" value="0" oninput="draw()"></div>
+ </div>
+ <div class="btns">
+  <label class="btn up">CHỌN ẢNH<input hidden type="file" accept="image/*" onchange="init(event)"></label>
+  <button class="btn ai" onclick="aiAuto()">AI AUTO ✨</button>
+  <button class="btn dl" onclick="exportImg()">LƯU</button>
+ </div>
+</div>
+
+<script>
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d',{willReadFrequently:true});
+const msg = document.getElementById('msg');
+
+let source=null;
+let detector=null;
+let scale=1;
+let faceBox=null;
+
+/* LOAD AI */
+(async()=>{
+ await tf.ready();
+ const model = faceDetection.SupportedModels.MediaPipeFaceDetector;
+ detector = await faceDetection.createDetector(model,{
+  runtime:'tfjs',
+  maxFaces:1
+ });
+ msg.innerText='AI SẴN SÀNG';
+})();
+
+/* LOAD ẢNH – PREVIEW NHẸ */
+function init(e){
+ const f=e.target.files[0];
+ if(!f) return;
+
+ faceBox=null;
+
+ const r=new FileReader();
+ r.onload=ev=>{
+  source=new Image();
+  source.onload=()=>{
+   const maxW = innerWidth*0.95;
+   const maxH = innerHeight*0.75;
+
+   scale = Math.min(
+    maxW/source.width,
+    maxH/source.height,
+    1
+   );
+
+   cv.width = source.width*scale;
+   cv.height = source.height*scale;
+
+   draw();
+   msg.innerText='BẤM AI AUTO HOẶC CHỈNH TAY';
+  };
+  source.src=ev.target.result;
+ };
+ r.readAsDataURL(f);
+}
+
+/* VẼ */
+function draw(){
+ if(!source) return;
+ ctx.setTransform(1,0,0,1,0,0);
+ ctx.clearRect(0,0,cv.width,cv.height);
+ ctx.filter=`
+  brightness(${br.value}%)
+  contrast(${ct.value}%)
+  saturate(${sa.value}%)
+  sepia(${sp.value}%)
+ `;
+ ctx.drawImage(source,0,0,cv.width,cv.height);
+ ctx.filter='none';
+}
+
+/* AI AUTO – CACHE FACE */
+async function aiAuto(){
+ if(!source||!detector) return;
+
+ br.value=112;
+ ct.value=108;
+ sa.value=115;
+ sp.value=5;
+ draw();
+
+ if(!faceBox){
+  const faces=await detector.estimateFaces(cv);
+  if(!faces.length){
+   msg.innerText='KHÔNG TÌM THẤY MẶT';
+   return;
+  }
+  faceBox=faces[0].box;
+ }
+
+ smoothSkin(faceBox);
+ msg.innerText='AI ĐÃ XỬ LÝ';
+}
+
+/* MỊN DA – GIỮ NÉT */
+function smoothSkin(b){
+ let x=b.xMin,y=b.yMin,w=b.width,h=b.height;
+
+ const padX=w*0.1,padY=h*0.15;
+ x+=padX;y+=padY;w-=padX*2;h-=padY*2;
+
+ x=Math.max(0,x);y=Math.max(0,y);
+ w=Math.min(cv.width,w);h=Math.min(cv.height,h);
+
+ const img=ctx.getImageData(x,y,w,h);
+ const d=img.data;
+
+ for(let i=0;i<d.length;i+=4){
+  d[i]=d[i]*0.93+10;
+  d[i+1]=d[i+1]*0.93+10;
+  d[i+2]=d[i+2]*0.93+10;
+ }
+ ctx.putImageData(img,x,y);
+}
+
+/* XUẤT ẢNH FULL RES */
+function exportImg(){
+ if(!source) return;
+
+ const out=document.createElement('canvas');
+ out.width=source.width;
+ out.height=source.height;
+ const octx=out.getContext('2d');
+
+ octx.filter=`
+  brightness(${br.value}%)
+  contrast(${ct.value}%)
+  saturate(${sa.value}%)
+  sepia(${sp.value}%)
+ `;
+ octx.drawImage(source,0,0);
+
+ const a=document.createElement('a');
+ a.download='TB49_ULTRA_AI.jpg';
+ a.href=out.toDataURL('image/jpeg',0.95);
+ a.click();
+}
+</script>
+</body>
+</html>
