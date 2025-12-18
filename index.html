@@ -1,36 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ThanhBinh49 AI Pro</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <style>
-body{margin:0;font-family:'Inter',sans-serif;background:#F5F5F7;}
+/* --- Reset & Font --- */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;-webkit-tap-highlight-color:transparent;}
+body{background:#f5f5f7;color:#1E1E2F;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+
+/* --- Header --- */
 header{background:#1E1E2F;color:white;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 5px rgba(0,0,0,0.3);}
-header h1{margin:0;font-size:1.6rem;}
-main{display:flex;height:calc(100vh - 60px);}
-#sidebar{width:320px;background:#2C2C3E;color:white;padding:15px;display:flex;flex-direction:column;gap:12px;box-shadow:2px 0 5px rgba(0,0,0,0.2);overflow-y:auto;}
-#sidebar button,input[type=text]{padding:10px;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:1rem;transition:0.2s;}
+header h1{font-size:1.5rem;}
+header button{background:#4ECDC4;border:none;border-radius:6px;padding:6px 10px;color:white;font-weight:bold;font-size:0.9rem;cursor:pointer;transition:0.2s;}
+header button:hover{background:#3bb3a2;}
+
+/* --- Main Layout --- */
+main{flex:1;display:flex;overflow:hidden;}
+#sidebar{width:280px;background:#2C2C3E;color:white;padding:15px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;box-shadow:2px 0 5px rgba(0,0,0,0.2);}
+#sidebar button,input[type=text],input[type=range]{border:none;border-radius:6px;padding:8px;font-weight:bold;font-size:0.9rem;cursor:pointer;transition:0.2s;}
 #sidebar button{background:#4ECDC4;color:white;}
 #sidebar button:hover{background:#3bb3a2;}
-#canvas-container{flex:1;display:flex;justify-content:center;align-items:center;background:#fff;position:relative;overflow:hidden;}
-#editor{border:2px solid #1E1E2F;border-radius:4px;touch-action:none;}
-footer{background:#1E1E2F;color:white;text-align:center;padding:10px;font-size:0.85rem;box-shadow:0 -2px 5px rgba(0,0,0,0.3);}
-input[type=range]{width:100%;}
 .slider-container{display:flex;flex-direction:column;gap:4px;}
-.filter-btn{padding:8px;border:none;border-radius:5px;cursor:pointer;background:#FF6B6B;color:white;font-weight:bold;font-size:0.9rem;transition:0.2s;}
+.filter-btn{background:#FF6B6B;color:white;padding:8px;font-weight:bold;font-size:0.9rem;cursor:pointer;border-radius:5px;transition:0.2s;}
 .filter-btn:hover{background:#e35a5a;}
+
+/* --- Canvas --- */
+#canvas-container{flex:1;background:#fff;display:flex;justify-content:center;align-items:center;position:relative;overflow:hidden;}
+#editor{border:2px solid #1E1E2F;border-radius:6px;touch-action:none;max-width:100%;max-height:100%;}
+
+/* --- Chat --- */
 #chat-box{flex:1;background:#fff;color:#000;padding:8px;overflow-y:auto;height:180px;border-radius:6px;margin-top:5px;font-size:0.85rem;}
 #chat-input{width:100%;padding:6px;border-radius:5px;border:1px solid #ccc;margin-top:5px;}
-#crop-tools{display:flex;gap:5px;flex-wrap:wrap;}
-#remove-mask-btn{background:#FF3B3B;}
+
+/* --- Footer --- */
+footer{background:#1E1E2F;color:white;text-align:center;padding:10px;font-size:0.85rem;box-shadow:0 -2px 5px rgba(0,0,0,0.3);}
+
+/* --- Responsive --- */
 @media(max-width:768px){
   main{flex-direction:column;}
-  #sidebar{width:100%;height:55vh;}
-  #canvas-container{height:45vh;}
+  #sidebar{width:100%;height:50vh;}
+  #canvas-container{height:50vh;}
 }
 </style>
 </head>
@@ -38,65 +53,66 @@ input[type=range]{width:100%;}
 
 <header>
 <h1>ThanhBinh49 AI Pro</h1>
-<div>User</div>
+<button onclick="location.reload()">Tải lại</button>
 </header>
 
 <main>
 <div id="sidebar">
-<button onclick="uploadImage()">Upload Image</button>
+<button onclick="uploadImage()">Tải ảnh lên</button>
 
 <div class="slider-container">
-<label>Brightness</label>
+<label>Độ sáng</label>
 <input type="range" id="brightness" min="0" max="200" value="100" oninput="applyFilters()">
 </div>
 <div class="slider-container">
-<label>Contrast</label>
+<label>Độ tương phản</label>
 <input type="range" id="contrast" min="0" max="200" value="100" oninput="applyFilters()">
 </div>
 <div class="slider-container">
-<label>Saturation</label>
+<label>Độ bão hòa</label>
 <input type="range" id="saturation" min="0" max="200" value="100" oninput="applyFilters()">
 </div>
 
-<label>Preset Filters</label>
-<button class="filter-btn" onclick="applyPreset('none')">None</button>
-<button class="filter-btn" onclick="applyPreset('warm')">Warm</button>
-<button class="filter-btn" onclick="applyPreset('cool')">Cool</button>
-<button class="filter-btn" onclick="applyPreset('cinematic')">Cinematic</button>
-<button class="filter-btn" onclick="applyPreset('mono')">Mono</button>
+<label>Bộ lọc sẵn</label>
+<button class="filter-btn" onclick="applyPreset('none')">Mặc định</button>
+<button class="filter-btn" onclick="applyPreset('warm')">Ấm áp</button>
+<button class="filter-btn" onclick="applyPreset('cool')">Lạnh</button>
+<button class="filter-btn" onclick="applyPreset('cinematic')">Điện ảnh</button>
+<button class="filter-btn" onclick="applyPreset('mono')">Đen trắng</button>
 
-<hr style="border:1px solid #4ECDC4;">
+<hr>
 
-<label>Crop / Rotate / Flip</label>
-<div id="crop-tools">
-<button onclick="rotateCanvas(90)">Rotate 90°</button>
-<button onclick="rotateCanvas(180)">Rotate 180°</button>
-<button onclick="flipCanvas('horizontal')">Flip H</button>
-<button onclick="flipCanvas('vertical')">Flip V</button>
-</div>
+<label>Xoay / Lật</label>
+<button onclick="rotateCanvas(90)">Xoay 90°</button>
+<button onclick="rotateCanvas(180)">Xoay 180°</button>
+<button onclick="flipCanvas('horizontal')">Lật ngang</button>
+<button onclick="flipCanvas('vertical')">Lật dọc</button>
 
-<hr style="border:1px solid #4ECDC4;">
+<hr>
 
-<label>Remove Background (Manual)</label>
-<button id="remove-mask-btn" onclick="applyRemoveMask()">Xóa nền</button>
+<label>Xóa nền thủ công</label>
+<input type="range" id="brushSize" min="5" max="50" value="10">
+<button onclick="applyRemoveMask()">Xóa nền</button>
+<button onclick="undoMask()">Undo mask</button>
 
-<hr style="border:1px solid #4ECDC4;">
+<hr>
 
-<label>Create Image from Text</label>
-<input type="text" id="textPrompt" placeholder="Enter prompt...">
-<button onclick="generateFromText()">Generate Image</button>
+<label>Tạo ảnh từ văn bản</label>
+<input type="text" id="textPrompt" placeholder="Nhập mô tả...">
+<button onclick="generateFromText()">Tạo ảnh</button>
 
-<hr style="border:1px solid #4ECDC4;">
+<hr>
 
-<label>AI Chat Assistant</label>
+<label>Trợ lý AI</label>
 <div id="chat-box"></div>
-<input type="text" id="chat-input" placeholder="Ask AI..." onkeydown="if(event.key==='Enter'){sendChat()}">
-<button onclick="sendChat()">Send</button>
+<input type="text" id="chat-input" placeholder="Nhập câu hỏi..." onkeydown="if(event.key==='Enter'){sendChat()}">
+<button onclick="sendChat()">Gửi</button>
 
-<button onclick="undo()">Undo</button>
-<button onclick="redo()">Redo</button>
-<button onclick="downloadImage()">Save Image</button>
-<button onclick="location.reload()">Reload App</button>
+<hr>
+
+<button onclick="undo()">Hoàn tác</button>
+<button onclick="redo()">Làm lại</button>
+<button onclick="downloadImage()">Lưu ảnh</button>
 </div>
 
 <div id="canvas-container">
@@ -104,24 +120,21 @@ input[type=range]{width:100%;}
 </div>
 </main>
 
-<footer>ThanhBinh49 AI Pro - GitHub Pages + Manual Background Removal + Cache Optimized</footer>
+<footer>ThanhBinh49 AI Pro - iPhone friendly + Mobile App Style</footer>
 
 <input type="file" id="fileInput" style="display:none" accept="image/*">
 
 <script>
-let canvas=document.getElementById('editor'),
-ctx=canvas.getContext('2d'),
-img=new Image(),
-history=[],historyIndex=-1,
-currentPreset='none',
-chatHistory=JSON.parse(localStorage.getItem('tb49Chat')||'[]'),
-isMasking=false,
-maskPixels=[];
+/* --- Core Variables --- */
+let canvas=document.getElementById('editor'), ctx=canvas.getContext('2d'), img=new Image();
+let history=[],historyIndex=-1, maskHistory=[], maskHistoryIndex=-1;
+let currentPreset='none', brushSize=10;
+let maskPixels=[], isMasking=false;
 
-// --- Upload ---
+/* --- Upload --- */
 function uploadImage(){ document.getElementById('fileInput').click(); }
 document.getElementById('fileInput').onchange=function(e){
-  let file=e.target.files[0],reader=new FileReader();
+  let file=e.target.files[0], reader=new FileReader();
   reader.onload=function(ev){
     img.onload=function(){
       canvas.width=img.width>1000?1000:img.width;
@@ -134,7 +147,7 @@ document.getElementById('fileInput').onchange=function(e){
   reader.readAsDataURL(file);
 }
 
-// --- Filters ---
+/* --- Filters & Presets --- */
 function applyFilters(){
   if(!img.src) return;
   ctx.drawImage(img,0,0,canvas.width,canvas.height);
@@ -144,7 +157,7 @@ function applyFilters(){
   let imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
   let d=imgData.data;
   for(let i=0;i<d.length;i+=4){
-    d[i]*=b;d[i+1]*=b;d[i+2]*=b;
+    d[i]*=b; d[i+1]*=b; d[i+2]*=b;
     d[i]=((d[i]-128)*c)+128; d[i+1]=((d[i+1]-128)*c)+128; d[i+2]=((d[i+2]-128)*c)+128;
     let avg=(d[i]+d[i+1]+d[i+2])/3;
     d[i]=avg+(d[i]-avg)*s; d[i+1]=avg+(d[i+1]-avg)*s; d[i+2]=avg+(d[i+2]-avg)*s;
@@ -154,7 +167,6 @@ function applyFilters(){
   saveHistory();
 }
 
-// --- Presets ---
 function applyPreset(name){
   currentPreset=name;
   if(!img.src) return;
@@ -173,16 +185,13 @@ function applyPreset(name){
   saveHistory();
 }
 
-// --- Undo/Redo ---
+/* --- Undo / Redo --- */
 function saveHistory(){ if(historyIndex<history.length-1) history.splice(historyIndex+1); history.push(canvas.toDataURL()); historyIndex=history.length-1; }
 function undo(){ if(historyIndex>0){ historyIndex--; loadHistory(); } }
 function redo(){ if(historyIndex<history.length-1){ historyIndex++; loadHistory(); } }
 function loadHistory(){ let imgH=new Image(); imgH.src=history[historyIndex]; imgH.onload=()=>{ ctx.drawImage(imgH,0,0,canvas.width,canvas.height); } }
 
-// --- Download ---
-function downloadImage(){ let a=document.createElement('a'); a.download="ThanhBinh49-Pro.png"; a.href=canvas.toDataURL(); a.click(); }
-
-// --- Rotate / Flip ---
+/* --- Canvas Transform --- */
 function rotateCanvas(deg){
   if(!img.src) return;
   const tempCanvas=document.createElement('canvas');
@@ -206,7 +215,7 @@ function flipCanvas(dir){
   saveHistory();
 }
 
-// --- Manual Remove Background ---
+/* --- Mask / Xóa nền --- */
 canvas.addEventListener('pointerdown',e=>{ isMasking=true; drawMask(e); });
 canvas.addEventListener('pointermove',e=>{ if(isMasking) drawMask(e); });
 canvas.addEventListener('pointerup',()=>{ isMasking=false; });
@@ -216,17 +225,16 @@ function drawMask(e){
   const x=Math.floor((e.clientX-rect.left)*(canvas.width/rect.width));
   const y=Math.floor((e.clientY-rect.top)*(canvas.height/rect.height));
   maskPixels.push({x,y});
+  brushSize=parseInt(document.getElementById('brushSize').value);
   ctx.fillStyle='rgba(255,0,0,0.5)';
-  ctx.beginPath(); ctx.arc(x,y,10,0,Math.PI*2);
-  ctx.fill();
+  ctx.beginPath(); ctx.arc(x,y,brushSize,0,Math.PI*2); ctx.fill();
 }
-
 function applyRemoveMask(){
   if(maskPixels.length===0) return alert("Chọn vùng đỏ muốn xóa!");
   const imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
   maskPixels.forEach(p=>{
-    for(let i=-10;i<=10;i++){
-      for(let j=-10;j<=10;j++){
+    for(let i=-brushSize;i<=brushSize;i++){
+      for(let j=-brushSize;j<=brushSize;j++){
         let xx=p.x+i,yy=p.y+j;
         if(xx>=0&&xx<canvas.width&&yy>=0&&yy<canvas.height){
           const idx=(yy*canvas.width+xx)*4;
@@ -236,84 +244,24 @@ function applyRemoveMask(){
     }
   });
   ctx.putImageData(imgData,0,0);
+  maskHistory.push(maskPixels.slice()); maskHistoryIndex=maskHistory.length-1;
   maskPixels=[];
   saveHistory();
 }
-
-// --- Gemini Text-to-Image ---
-async function generateFromText(){
-  const prompt=document.getElementById('textPrompt').value;
-  if(!prompt) return alert("Enter a prompt!");
-  
-  const apiKey="AIzaSyCkZR0f-nmSHewwE4331BdxjfXy_qUbPY0";
-  const url="https://api.generativeai.googleapis.com/v1beta2/images:generate";
-  
-  document.getElementById('textPrompt').disabled=true;
-
-  try{
-    const res=await fetch(url,{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":`Bearer ${apiKey}`
-      },
-      body:JSON.stringify({
-        prompt:prompt,
-        model:"imagen-4.0-preview",
-        size:"1024x1024"
-      })
-    });
-    const data=await res.json();
-    if(data.images && data.images[0].imageUri){
-      const newImg=new Image();
-      newImg.crossOrigin="anonymous";
-      newImg.onload=()=>{ canvas.width=newImg.width>1000?1000:newImg.width; canvas.height=newImg.height>700?700:newImg.height; ctx.drawImage(newImg,0,0,canvas.width,canvas.height); saveHistory(); }
-      newImg.src=data.images[0].imageUri;
-    }
-  }catch(e){ alert("Gemini API error"); }
-  document.getElementById('textPrompt').disabled=false;
+function undoMask(){
+  if(maskHistoryIndex>=0){
+    maskHistoryIndex--;
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+  }
 }
 
-// --- Gemini AI Chat + Female TTS ---
-async function sendChat(){
-  const prompt=document.getElementById('chat-input').value;
-  if(!prompt) return;
-  const chatBox=document.getElementById('chat-box');
-  chatBox.innerHTML+="<div><b>You:</b> "+prompt+"</div>";
-  document.getElementById('chat-input').value="";
-  
-  chatHistory.push({role:"user",content:prompt});
+/* --- Download --- */
+function downloadImage(){ let a=document.createElement('a'); a.download="ThanhBinh49-Pro.png"; a.href=canvas.toDataURL(); a.click(); }
 
-  const apiKey="AIzaSyCkZR0f-nmSHewwE4331BdxjfXy_qUbPY0";
-  const url="https://api.generativeai.googleapis.com/v1beta2/models/text-bison-001:generate";
-  
-  try{
-    const res=await fetch(url,{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":`Bearer ${apiKey}`
-      },
-      body:JSON.stringify({
-        prompt: chatHistory.map(h=>h.role+": "+h.content).join("\n"),
-        maxOutputTokens:500
-      })
-    });
-    const data=await res.json();
-    const answer=(data.candidates && data.candidates[0].content)?data.candidates[0].content:"No response";
-    chatBox.innerHTML+="<div><b>AI:</b> "+answer+"</div>";
-    chatBox.scrollTop=chatBox.scrollHeight;
-    chatHistory.push({role:"ai",content:answer});
-    localStorage.setItem('tb49Chat',JSON.stringify(chatHistory));
+/* --- Text-to-Image & Chat AI Placeholder --- */
+function generateFromText(){ alert("Gemini / OpenAI cần server proxy để hoạt động"); }
+function sendChat(){ alert("Gemini / OpenAI cần server proxy để hoạt động"); }
 
-    // Female TTS
-    const utter=new SpeechSynthesisUtterance(answer);
-    const voices=speechSynthesis.getVoices();
-    utter.voice=voices.find(v=>v.name.toLowerCase().includes('female') || v.lang.startsWith('vi')) || voices[0];
-    utter.rate=1; utter.pitch=1;
-    speechSynthesis.speak(utter);
-  }catch(e){ alert("Gemini Chat API error"); }
-}
 </script>
 
 </body>
