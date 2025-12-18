@@ -3,23 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TB49 AI - HẾT CHÁN</title>
+    <title>TB49 AI - SIÊU CẤP</title>
     <style>
-        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        .nav { background: #111; border-bottom: 2px solid #222; padding: 10px 0; }
+        body { margin: 0; background: #000; color: #fff; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .nav { background: #111; border-bottom: 2px solid #222; padding: 10px 0; z-index: 10; }
+        header { text-align: center; color: #007aff; font-weight: 800; margin-bottom: 8px; font-size: 1.2rem; }
         .tools { display: flex; gap: 8px; overflow-x: auto; padding: 0 10px; }
-        #v { flex: 1; display: flex; align-items: center; justify-content: center; background: #050505; position: relative; }
-        canvas { max-width: 100%; max-height: 100%; border: 1px solid #333; }
-        #loading { position: absolute; display: none; color: #007aff; background: rgba(0,0,0,0.9); padding: 20px; border-radius: 10px; border: 1px solid #007aff; text-align: center; }
-        #chat { height: 150px; background: #000; border-top: 2px solid #222; display: flex; flex-direction: column; }
-        #log { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; color: #888; }
+        #v { flex: 1; display: flex; align-items: center; justify-content: center; background: #050505; position: relative; padding: 5px; }
+        canvas { max-width: 100%; max-height: 100%; border-radius: 10px; border: 1px solid #333; }
+        #loading { position: absolute; display: none; color: #007aff; background: rgba(0,0,0,0.9); padding: 15px; border-radius: 10px; border: 1px solid #007aff; z-index: 20; }
+        #chat { height: 180px; background: #000; border-top: 2px solid #222; display: flex; flex-direction: column; }
+        #log { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; color: #ccc; line-height: 1.4; }
         .in-box { display: flex; padding: 10px; gap: 8px; background: #111; }
-        button { background: #222; color: #fff; border: 1px solid #444; padding: 10px 15px; border-radius: 8px; font-weight: bold; }
-        input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; outline: none; }
+        button { background: #222; color: #fff; border: 1px solid #444; padding: 10px 15px; border-radius: 10px; font-weight: bold; white-space: nowrap; }
+        button:active { background: #007aff; transform: scale(0.95); }
+        input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; outline: none; font-size: 16px; }
     </style>
 </head>
 <body>
     <div class="nav">
+        <header>THANHBINH49 AI PRO</header>
         <div class="tools">
             <button onclick="document.getElementById('f').click()">📂 MỞ</button>
             <button onclick="ef(1.5)" style="color:#ffcc00">🔥 BOOST</button>
@@ -30,17 +33,18 @@
     </div>
     <div id="v">
         <canvas id="c"></canvas>
-        <div id="loading">🏮 AI ĐANG TỈNH TÁO...<br>ĐANG VẼ ĐÚNG Ý SẾP!</div>
+        <div id="loading">⚡ ĐANG XỬ LÝ...</div>
     </div>
     <input type="file" id="f" hidden onchange="ld(event)">
     <div id="chat">
-        <div id="log">AI: Em hết loạn thị rồi sếp ơi! Gõ đi nào.</div>
+        <div id="log">AI: Đã nhận lệnh sếp! Em đang chạy bằng "Pin" Gemini cực mạnh.</div>
         <div class="in-box">
-            <input type="text" id="m" placeholder="Vẽ gì đó (VD: vẽ rồng vàng)...">
-            <button onclick="go()" style="background:#007aff; border:none; width:50px; border-radius:8px">🚀</button>
+            <input type="text" id="m" placeholder="Chat hoặc gõ 'vẽ con rồng'...">
+            <button onclick="go()" style="background:#007aff; border:none; width:50px; border-radius:10px">🚀</button>
         </div>
     </div>
 <script>
+    const API_KEY = "AIzaSyAosEJtRm3eHM-zVmsIzAMfipoU3v9wEek";
     const cv = document.getElementById('c'), x = cv.getContext('2d'), ldBox = document.getElementById('loading');
     let ori = null;
 
@@ -48,7 +52,11 @@
         const r = new FileReader();
         r.onload = (ev) => {
             const img = new Image();
-            img.onload = () => { cv.width = img.width; cv.height = img.height; x.drawImage(img, 0, 0); ori = img; };
+            img.onload = () => {
+                const ratio = Math.min(window.innerWidth/img.width, 1000/img.height, 1);
+                cv.width = img.width * ratio; cv.height = img.height * ratio;
+                x.drawImage(img, 0, 0, cv.width, cv.height); ori = img;
+            };
             img.src = ev.target.result;
         };
         r.readAsDataURL(e.target.files[0]);
@@ -56,36 +64,51 @@
 
     function ef(t) {
         if(!ori) return;
-        x.drawImage(ori, 0, 0);
+        x.drawImage(ori, 0, 0, cv.width, cv.height);
         const d = x.getImageData(0,0,cv.width,cv.height), data = d.data;
         for(let i=0; i<data.length; i+=4){ data[i]*=t; data[i+1]*=t; data[i+2]*=t; }
         x.putImageData(d,0,0);
     }
 
-    function boom() { if(confirm("Hủy hết nhé?")) { x.clearRect(0,0,cv.width,cv.height); ori=null; msg("AI","Bùm sạch!"); } }
-    function rs() { if(ori) x.drawImage(ori,0,0); }
+    function boom() { if(confirm("Hủy hết bằng chứng nhé sếp?")) { x.clearRect(0,0,cv.width,cv.height); ori=null; msg("AI","BÙM! Đã sạch bách."); } }
+    function rs() { if(ori) x.drawImage(ori,0,0,cv.width,cv.height); }
     function sv() { const a=document.createElement('a'); a.download='tb49.png'; a.href=cv.toDataURL(); a.click(); }
 
     async function go() {
         const i = document.getElementById('m'), v = i.value.trim();
         if(!v) return; msg("Sếp", v); i.value = '';
+        ldBox.style.display = "block";
+
         if(v.toLowerCase().includes("vẽ")) {
-            ldBox.style.display = "block";
-            const aimg = new Image();
-            aimg.crossOrigin = "anonymous";
-            
-            // CHIÊU CUỐI: Thêm từ khóa 'masterpiece, high quality' để ép nó vẽ đẹp
-            const prompt = encodeURIComponent(v + ", masterpiece, high quality, real");
-            aimg.src = `https://image.pollinations.ai/prompt/${prompt}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random()*1e9)}`;
-            
+            // VẼ ẢNH BẰNG AI
+            const aimg = new Image(); aimg.crossOrigin = "anonymous";
+            aimg.src = `https://image.pollinations.ai/prompt/${encodeURIComponent(v + ", cinematic, 4k, detail") }?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random()*1e9)}`;
             aimg.onload = () => {
                 cv.width = 1024; cv.height = 1024;
-                x.drawImage(aimg, 0, 0, 1024, 1024);
-                ori = aimg; ldBox.style.display = "none";
-                msg("AI", "Rồng ra rồng, gái ra gái rồi nhé sếp!");
+                x.drawImage(aimg, 0, 0, 1024, 1024); ori = aimg;
+                ldBox.style.display = "none"; msg("AI", "Hàng của sếp đây!");
             };
-            aimg.onerror = () => { ldBox.style.display = "none"; msg("AI", "Lại lag rồi!"); };
-        } else { msg("AI", "Dạ sếp!"); }
+            aimg.onerror = () => { ldBox.style.display = "none"; msg("AI", "Lỗi vẽ rồi sếp!"); };
+        } else {
+            // CHAT VỚI GEMINI PRO
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: v }] }] })
+                });
+                const data = await res.json();
+                const reply = data.candidates[0].content.parts[0].text;
+                ldBox.style.display = "none";
+                msg("AI", reply);
+                // Đọc câu trả lời bằng giọng nói cho sếp nghe luôn
+                const s = new SpeechSynthesisUtterance(reply.substring(0, 100));
+                s.lang = 'vi-VN'; window.speechSynthesis.speak(s);
+            } catch (err) {
+                ldBox.style.display = "none";
+                msg("AI", "API bị lỗi hoặc hết hạn rồi sếp ơi!");
+            }
+        }
     }
 
     function msg(s, m) {
