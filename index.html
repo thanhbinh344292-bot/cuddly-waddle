@@ -3,52 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TB49 PRO - FIXED</title>
+    <title>TB49 AI - PIN ĐẦY</title>
     <style>
-        /* Sếp nhìn nè, tui dùng Flexbox để chia vùng rõ ràng */
-        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; }
-        
-        /* Header và Nút bấm luôn cố định ở trên */
-        .top-panel { background: #111; border-bottom: 2px solid #222; z-index: 100; padding: 10px 0; }
-        header { text-align: center; color: #007aff; font-weight: 800; margin-bottom: 10px; }
-        .tools { display: flex; gap: 8px; overflow-x: auto; padding: 0 10px; }
-        
-        /* Vùng hiển thị ảnh - Tự co giãn không lấn chiếm */
-        #v { flex: 1; display: flex; align-items: center; justify-content: center; background: #050505; overflow: hidden; position: relative; }
-        canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
+        body { margin: 0; background: #000; color: #fff; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        /* Khu vực điều khiển luôn nằm trên cùng */
+        .header-box { background: #111; border-bottom: 2px solid #222; padding: 10px 0; z-index: 999; }
+        header { text-align: center; color: #007aff; font-weight: 800; font-size: 1.2rem; margin-bottom: 8px; }
+        .btns { display: flex; gap: 8px; overflow-x: auto; padding: 0 10px; -webkit-overflow-scrolling: touch; }
+        button { background: #222; color: #fff; border: 1px solid #444; padding: 12px 18px; border-radius: 10px; font-weight: 600; white-space: nowrap; }
+        button:active { background: #007aff; transform: scale(0.95); }
 
-        /* Vùng Chat ở dưới cùng */
-        #chat { height: 140px; background: #000; border-top: 2px solid #222; display: flex; flex-direction: column; }
-        #log { flex: 1; overflow-y: auto; padding: 8px; font-size: 12px; color: #888; }
-        .in-box { display: flex; padding: 8px; gap: 5px; background: #111; }
-        
-        button { background: #222; color: #fff; border: 1px solid #444; padding: 10px 15px; border-radius: 8px; font-weight: 600; white-space: nowrap; }
-        button:active { background: #007aff; }
-        input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; outline: none; }
+        /* Khu vực ảnh tự co giãn */
+        #v { flex: 1; display: flex; align-items: center; justify-content: center; background: #050505; overflow: hidden; position: relative; padding: 5px; }
+        canvas { max-width: 100%; max-height: 100%; border-radius: 10px; border: 1px solid #333; }
+
+        /* Khu vực Chat */
+        #chat { height: 150px; background: #000; border-top: 2px solid #222; display: flex; flex-direction: column; }
+        #log { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; color: #aaa; }
+        .in-box { display: flex; padding: 10px; gap: 8px; background: #111; }
+        input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; outline: none; font-size: 16px; }
     </style>
 </head>
 <body>
 
-    <div class="top-panel">
+    <div class="header-box">
         <header>THANHBINH49 AI PRO</header>
-        <div class="tools">
+        <div class="btns">
             <button onclick="document.getElementById('f').click()">📂 MỞ</button>
             <button onclick="ef(1.5)" style="color:#ffcc00">🔥 BOOST</button>
-            <button onclick="ef('bw')">🌓 B&W</button>
+            <button onclick="ef('bw')">🌓 ĐEN TRẮNG</button>
             <button onclick="rs()">🔄 RESET</button>
             <button onclick="sv()" style="background:#007aff; border:none">💾 LƯU</button>
         </div>
     </div>
 
     <div id="v"><canvas id="c"></canvas></div>
-
     <input type="file" id="f" hidden onchange="ld(event)">
 
     <div id="chat">
-        <div id="log">AI: Đã fix lỗi che nút! Sếp thử gõ "vẽ mèo" xem sao.</div>
+        <div id="log">AI: Đã nạp đầy pin! Gõ "vẽ gì đó" đi sếp Bình!</div>
         <div class="in-box">
-            <input type="text" id="m" placeholder="Lệnh vẽ hoặc chat...">
-            <button onclick="go()" style="background:#007aff; border:none; width:44px; border-radius:8px">🚀</button>
+            <input type="text" id="m" placeholder="Lệnh vẽ (Ví dụ: vẽ rồng)...">
+            <button onclick="go()" style="background:#007aff; border:none; width:50px; border-radius:10px">🚀</button>
         </div>
     </div>
 
@@ -61,13 +57,10 @@
         r.onload = (ev) => {
             const img = new Image();
             img.onload = () => {
-                // Ép ảnh vào khung nhìn, không cho tràn
-                const ratio = Math.min(800 / img.width, 800 / img.height, 1);
-                cv.width = img.width * ratio;
-                cv.height = img.height * ratio;
+                const ratio = Math.min(1000 / img.width, 1000 / img.height, 1);
+                cv.width = img.width * ratio; cv.height = img.height * ratio;
                 x.drawImage(img, 0, 0, cv.width, cv.height);
-                ori = img;
-                msg("AI", "Đã nạp ảnh gọn gàng!");
+                ori = img; msg("AI", "Đã nạp ảnh, sếp thi triển đi!");
             };
             img.src = ev.target.result;
         };
@@ -75,7 +68,7 @@
     }
 
     function ef(t) {
-        if(!ori) return;
+        if(!ori) return msg("AI", "Sếp chưa mở ảnh!");
         x.drawImage(ori, 0, 0, cv.width, cv.height);
         const d = x.getImageData(0, 0, cv.width, cv.height), data = d.data;
         for (let i = 0; i < data.length; i += 4) {
@@ -86,30 +79,31 @@
                 data[i] *= t; data[i+1] *= t; data[i+2] *= t;
             }
         }
-        x.putImageData(d, 0, 0);
+        x.putImageData(d, 0, 0); msg("AI", "Xong hiệu ứng!");
     }
 
     function rs() { if(ori) x.drawImage(ori, 0, 0, cv.width, cv.height); }
-    function sv() { const a = document.createElement('a'); a.download='tb49.png'; a.href=cv.toDataURL(); a.click(); }
+    function sv() { const a = document.createElement('a'); a.download='TB49.png'; a.href=cv.toDataURL(); a.click(); }
 
     async function go() {
         const i = document.getElementById('m'), v = i.value.trim();
-        if(!v) return; msg("Sếp", v); i.value = '';
+        if(!v) return; msg("Bạn", v); i.value = '';
         if(v.toLowerCase().includes("vẽ")) {
-            msg("AI", "Đang vẽ, đợi tí sếp...");
-            const aimg = new Image();
-            aimg.crossOrigin = "anonymous";
-            // Dùng seed ngẫu nhiên để ép AI phải tạo ảnh mới
-            aimg.src = "https://pollinations.ai/p/" + encodeURIComponent(v) + "?width=800&height=800&seed=" + Math.random();
+            msg("AI", "Đang nạp năng lượng vẽ...");
+            const aimg = new Image(); aimg.crossOrigin = "anonymous";
+            // Ép AI dùng link mới nhất
+            aimg.src = `https://pollinations.ai/p/${encodeURIComponent(v)}?width=800&height=800&seed=${Math.random()}&model=flux`;
             aimg.onload = () => {
                 cv.width = 800; cv.height = 800;
-                x.drawImage(aimg, 0, 0, 800, 800);
-                ori = aimg;
-                msg("AI", "Xong rồi sếp!");
-                window.speechSynthesis.speak(new SpeechSynthesisUtterance("Xong rồi sếp"));
+                x.drawImage(aimg, 0, 0, 800, 800); ori = aimg;
+                msg("AI", "Pin đầy, ảnh đã ra lò!");
+                if('speechSynthesis' in window) {
+                    const s = new SpeechSynthesisUtterance("Xong rồi sếp");
+                    s.lang = 'vi-VN'; window.speechSynthesis.speak(s);
+                }
             };
-            aimg.onerror = () => msg("AI", "Lỗi mạng rồi sếp ơi!");
-        } else { msg("AI", "Dạ em nghe!"); }
+            aimg.onerror = () => msg("AI", "Hết pin thật rồi sếp, thử lại xem!");
+        } else { msg("AI", "Em đây sếp!"); }
     }
 
     function msg(s, m) {
