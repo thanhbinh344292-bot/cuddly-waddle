@@ -8,43 +8,45 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
-body{margin:0;font-family:'Inter',sans-serif;background:#0f172a;color:white;display:flex;flex-direction:column;height:100vh;}
-header{padding:16px;text-align:center;font-weight:700;font-size:1.6rem;background:linear-gradient(135deg,#6366f1,#22d3ee);box-shadow:0 4px 12px rgba(0,0,0,0.3);border-bottom-left-radius:14px;border-bottom-right-radius:14px;}
-main{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px;gap:12px;}
-#canvas-container{position:relative;width:100%;display:flex;justify-content:center;align-items:center;}
-canvas{border-radius:20px;max-width:95%;max-height:50vh;box-shadow:0 10px 20px rgba(0,0,0,0.5);}
-#toolbar{position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.12);backdrop-filter:blur(10px);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 6px 16px rgba(0,0,0,0.4);}
-button,input[type=text],input[type=range]{border:none;border-radius:12px;padding:10px;font-size:1rem;cursor:pointer;transition:0.2s;}
+*{box-sizing:border-box;}
+body{margin:0;font-family:'Inter',sans-serif;background:#121212;color:white;display:flex;flex-direction:column;height:100vh;}
+header{padding:14px 20px;text-align:center;font-weight:700;font-size:1.5rem;background:linear-gradient(135deg,#6366f1,#22d3ee);box-shadow:0 4px 12px rgba(0,0,0,0.3);}
+main{flex:1;display:flex;flex-direction:row;gap:10px;padding:10px;}
+#sidebar-left,#sidebar-right{width:80px;min-width:80px;background:#1E1E2F;border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:10px;overflow:auto;}
+#canvas-container{flex:1;display:flex;justify-content:center;align-items:center;position:relative;}
+canvas{border-radius:16px;max-width:100%;max-height:80vh;box-shadow:0 10px 20px rgba(0,0,0,0.5);}
+button,input[type=range],input[type=text]{border:none;border-radius:12px;padding:8px;font-size:0.95rem;cursor:pointer;transition:0.2s;}
 button{background:linear-gradient(135deg,#6366f1,#22d3ee);color:white;font-weight:600;}
 button:hover{opacity:0.9;}
-input[type=range]{width:130px;}
-#chat-box{position:absolute;bottom:12px;left:12px;right:12px;max-height:180px;background:rgba(0,0,0,0.25);padding:10px;border-radius:16px;overflow-y:auto;backdrop-filter:blur(10px);}
-#chat-input{width:calc(100% - 16px);padding:8px;margin-top:6px;border-radius:12px;}
-#chat-box div{margin-bottom:6px;font-size:0.95rem;}
+input[type=range]{width:60px;transform:rotate(-90deg);margin:auto;}
+#chat-box{background:rgba(0,0,0,0.25);padding:10px;border-radius:16px;max-height:200px;overflow-y:auto;backdrop-filter:blur(8px);}
+#chat-input{width:calc(100% - 16px);padding:6px;margin-top:6px;border-radius:12px;}
+#chat-box div{margin-bottom:6px;font-size:0.9rem;}
 </style>
 </head>
 
 <body>
 <header>ThanhBinh49 AI Pro</header>
 <main>
-<div id="canvas-container">
-<canvas id="editor"></canvas>
+  <div id="sidebar-left">
+    <input type="file" id="fileInput" accept="image/*" title="Upload ảnh">
+    <input type="range" id="brightness" min="50" max="150" value="100" title="Brightness">
+    <input type="range" id="contrast" min="50" max="150" value="100" title="Contrast">
+    <button onclick="applyFilters()">Áp dụng</button>
+    <button onclick="downloadImage()">Lưu</button>
+  </div>
 
-<div id="toolbar">
-<input type="file" id="fileInput" accept="image/*">
-<input type="range" id="brightness" min="50" max="150" value="100" title="Độ sáng">
-<input type="range" id="contrast" min="50" max="150" value="100" title="Độ tương phản">
-<button onclick="applyFilters()">Áp dụng Filter</button>
-<input type="text" id="textPrompt" placeholder="Mô tả tạo ảnh AI">
-<button onclick="generateFromText()">Tạo ảnh</button>
-<button onclick="downloadImage()">Lưu ảnh</button>
-</div>
-
-<div id="chat-box">
-<input id="chat-input" placeholder="Nhập chat AI..." onkeydown="if(event.key==='Enter'){sendChat()}">
-<button onclick="sendChat()">Gửi</button>
-</div>
-</div>
+  <div id="canvas-container">
+    <canvas id="editor"></canvas>
+    <div id="sidebar-right">
+      <input type="text" id="textPrompt" placeholder="Mô tả tạo ảnh AI">
+      <button onclick="generateFromText()">Tạo ảnh</button>
+      <div id="chat-box">
+        <input id="chat-input" placeholder="Nhập chat AI..." onkeydown="if(event.key==='Enter'){sendChat()}">
+        <button onclick="sendChat()">Gửi</button>
+      </div>
+    </div>
+  </div>
 </main>
 
 <script>
@@ -57,8 +59,8 @@ document.getElementById('fileInput').onchange=e=>{
   const reader=new FileReader();
   reader.onload=ev=>{
     img.onload=()=>{
-      canvas.width=img.width>500?500:img.width;
-      canvas.height=img.height>500?500:img.height;
+      canvas.width=img.width>600?600:img.width;
+      canvas.height=img.height>600?600:img.height;
       ctx.drawImage(img,0,0,canvas.width,canvas.height);
     };
     img.src=ev.target.result;
@@ -91,7 +93,7 @@ function downloadImage(){
 }
 
 // AI Proxy URL
-const PROXY_URL="YOUR_PROXY_URL"; // Thay bằng server proxy Node.js
+const PROXY_URL="YOUR_PROXY_URL";
 
 async function generateFromText(){
   const prompt=document.getElementById('textPrompt').value;
