@@ -3,35 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TB49 AI - PIN ĐẦY</title>
+    <title>TB49 PRO - SELF DESTRUCT</title>
     <style>
-        body { margin: 0; background: #000; color: #fff; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        /* Khu vực điều khiển luôn nằm trên cùng */
-        .header-box { background: #111; border-bottom: 2px solid #222; padding: 10px 0; z-index: 999; }
-        header { text-align: center; color: #007aff; font-weight: 800; font-size: 1.2rem; margin-bottom: 8px; }
-        .btns { display: flex; gap: 8px; overflow-x: auto; padding: 0 10px; -webkit-overflow-scrolling: touch; }
-        button { background: #222; color: #fff; border: 1px solid #444; padding: 12px 18px; border-radius: 10px; font-weight: 600; white-space: nowrap; }
-        button:active { background: #007aff; transform: scale(0.95); }
+        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .top-nav { background: #111; border-bottom: 2px solid #222; padding: 10px 0; z-index: 99; }
+        header { text-align: center; color: #007aff; font-weight: 800; margin-bottom: 8px; }
+        .tools { display: flex; gap: 8px; overflow-x: auto; padding: 0 10px; }
+        
+        #v { flex: 1; display: flex; align-items: center; justify-content: center; background: #050505; position: relative; }
+        canvas { max-width: 100%; max-height: 100%; border: 1px solid #333; }
 
-        /* Khu vực ảnh tự co giãn */
-        #v { flex: 1; display: flex; align-items: center; justify-content: center; background: #050505; overflow: hidden; position: relative; padding: 5px; }
-        canvas { max-width: 100%; max-height: 100%; border-radius: 10px; border: 1px solid #333; }
-
-        /* Khu vực Chat */
         #chat { height: 150px; background: #000; border-top: 2px solid #222; display: flex; flex-direction: column; }
-        #log { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; color: #aaa; }
+        #log { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; color: #888; }
         .in-box { display: flex; padding: 10px; gap: 8px; background: #111; }
-        input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; outline: none; font-size: 16px; }
+        
+        button { background: #222; color: #fff; border: 1px solid #444; padding: 10px 15px; border-radius: 8px; font-weight: 600; white-space: nowrap; }
+        button:active { background: #007aff; }
+        input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; outline: none; }
+        
+        /* Nút tự hủy đỏ rực */
+        .btn-boom { background: #ff3b30; color: white; border: none; }
     </style>
 </head>
 <body>
 
-    <div class="header-box">
+    <div class="top-nav">
         <header>THANHBINH49 AI PRO</header>
-        <div class="btns">
+        <div class="tools">
             <button onclick="document.getElementById('f').click()">📂 MỞ</button>
             <button onclick="ef(1.5)" style="color:#ffcc00">🔥 BOOST</button>
-            <button onclick="ef('bw')">🌓 ĐEN TRẮNG</button>
+            <button class="btn-boom" onclick="boom()">☢️ TỰ HỦY</button>
             <button onclick="rs()">🔄 RESET</button>
             <button onclick="sv()" style="background:#007aff; border:none">💾 LƯU</button>
         </div>
@@ -41,10 +42,10 @@
     <input type="file" id="f" hidden onchange="ld(event)">
 
     <div id="chat">
-        <div id="log">AI: Đã nạp đầy pin! Gõ "vẽ gì đó" đi sếp Bình!</div>
+        <div id="log">AI: Cẩn thận với cái nút màu đỏ nha sếp...</div>
         <div class="in-box">
-            <input type="text" id="m" placeholder="Lệnh vẽ (Ví dụ: vẽ rồng)...">
-            <button onclick="go()" style="background:#007aff; border:none; width:50px; border-radius:10px">🚀</button>
+            <input type="text" id="m" placeholder="Vẽ gì đó...">
+            <button onclick="go()" style="background:#007aff; border:none; width:44px; border-radius:8px">🚀</button>
         </div>
     </div>
 
@@ -57,10 +58,11 @@
         r.onload = (ev) => {
             const img = new Image();
             img.onload = () => {
-                const ratio = Math.min(1000 / img.width, 1000 / img.height, 1);
+                const ratio = Math.min(800/img.width, 800/img.height, 1);
                 cv.width = img.width * ratio; cv.height = img.height * ratio;
                 x.drawImage(img, 0, 0, cv.width, cv.height);
-                ori = img; msg("AI", "Đã nạp ảnh, sếp thi triển đi!");
+                ori = img;
+                msg("AI", "Đã nhận hàng!");
             };
             img.src = ev.target.result;
         };
@@ -68,42 +70,40 @@
     }
 
     function ef(t) {
-        if(!ori) return msg("AI", "Sếp chưa mở ảnh!");
+        if(!ori) return;
         x.drawImage(ori, 0, 0, cv.width, cv.height);
         const d = x.getImageData(0, 0, cv.width, cv.height), data = d.data;
-        for (let i = 0; i < data.length; i += 4) {
-            if(t === 'bw') {
-                let a = (data[i] + data[i+1] + data[i+2]) / 3;
-                data[i] = data[i+1] = data[i+2] = a;
-            } else {
-                data[i] *= t; data[i+1] *= t; data[i+2] *= t;
-            }
+        for (let i = 0; i < data.length; i += 4) { data[i]*=t; data[i+1]*=t; data[i+2]*=t; }
+        x.putImageData(d, 0, 0);
+    }
+
+    // NÚT TỰ HỦY: Xóa sạch bách mọi thứ
+    function boom() {
+        if(confirm("Sếp chắc chắn muốn 'bốc hơi' hết ảnh không?")) {
+            x.clearRect(0, 0, cv.width, cv.height);
+            ori = null;
+            cv.width = 300; cv.height = 150;
+            document.getElementById('log').innerHTML = "<b>HỆ THỐNG ĐÃ TỰ HỦY!</b>";
+            alert("BÙM! Tan xác pháo.");
         }
-        x.putImageData(d, 0, 0); msg("AI", "Xong hiệu ứng!");
     }
 
     function rs() { if(ori) x.drawImage(ori, 0, 0, cv.width, cv.height); }
-    function sv() { const a = document.createElement('a'); a.download='TB49.png'; a.href=cv.toDataURL(); a.click(); }
+    function sv() { const a = document.createElement('a'); a.download='tb49.png'; a.href=cv.toDataURL(); a.click(); }
 
     async function go() {
         const i = document.getElementById('m'), v = i.value.trim();
-        if(!v) return; msg("Bạn", v); i.value = '';
+        if(!v) return; msg("Sếp", v); i.value = '';
         if(v.toLowerCase().includes("vẽ")) {
-            msg("AI", "Đang nạp năng lượng vẽ...");
+            msg("AI", "Đang múa cọ...");
             const aimg = new Image(); aimg.crossOrigin = "anonymous";
-            // Ép AI dùng link mới nhất
-            aimg.src = `https://pollinations.ai/p/${encodeURIComponent(v)}?width=800&height=800&seed=${Math.random()}&model=flux`;
+            aimg.src = `https://pollinations.ai/p/${encodeURIComponent(v)}?width=800&height=800&seed=${Math.random()}`;
             aimg.onload = () => {
                 cv.width = 800; cv.height = 800;
                 x.drawImage(aimg, 0, 0, 800, 800); ori = aimg;
-                msg("AI", "Pin đầy, ảnh đã ra lò!");
-                if('speechSynthesis' in window) {
-                    const s = new SpeechSynthesisUtterance("Xong rồi sếp");
-                    s.lang = 'vi-VN'; window.speechSynthesis.speak(s);
-                }
+                msg("AI", "Hàng về sếp ơi!");
             };
-            aimg.onerror = () => msg("AI", "Hết pin thật rồi sếp, thử lại xem!");
-        } else { msg("AI", "Em đây sếp!"); }
+        } else { msg("AI", "Dạ sếp!"); }
     }
 
     function msg(s, m) {
