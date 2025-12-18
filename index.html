@@ -4,55 +4,54 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ThanhBinh49 AI Pro</title>
-
 <meta name="theme-color" content="#1E1E2F">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
 <style>
 body{margin:0;font-family:'Inter',sans-serif;background:#0f172a;color:white;display:flex;flex-direction:column;height:100vh;}
-header{padding:16px;text-align:center;font-weight:700;font-size:1.5rem;background:linear-gradient(135deg,#6366f1,#22d3ee);box-shadow:0 2px 8px rgba(0,0,0,0.3);border-bottom-left-radius:12px;border-bottom-right-radius:12px;}
-main{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px;gap:10px;}
+header{padding:16px;text-align:center;font-weight:700;font-size:1.6rem;background:linear-gradient(135deg,#6366f1,#22d3ee);box-shadow:0 4px 12px rgba(0,0,0,0.3);border-bottom-left-radius:14px;border-bottom-right-radius:14px;}
+main{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px;gap:12px;}
 #canvas-container{position:relative;width:100%;display:flex;justify-content:center;align-items:center;}
-canvas{border-radius:16px;max-width:95%;max-height:50vh;box-shadow:0 8px 16px rgba(0,0,0,0.4);}
-#toolbar{position:absolute;top:10px;right:10px;background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:6px;}
-button,input[type=text],input[type=range]{border:none;border-radius:12px;padding:8px;font-size:0.95rem;cursor:pointer;transition:0.2s;}
+canvas{border-radius:20px;max-width:95%;max-height:50vh;box-shadow:0 10px 20px rgba(0,0,0,0.5);}
+#toolbar{position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.12);backdrop-filter:blur(10px);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 6px 16px rgba(0,0,0,0.4);}
+button,input[type=text],input[type=range]{border:none;border-radius:12px;padding:10px;font-size:1rem;cursor:pointer;transition:0.2s;}
 button{background:linear-gradient(135deg,#6366f1,#22d3ee);color:white;font-weight:600;}
 button:hover{opacity:0.9;}
-input[type=range]{width:120px;}
-#chat-box{position:absolute;bottom:10px;left:10px;right:10px;max-height:180px;background:rgba(0,0,0,0.3);padding:8px;border-radius:16px;overflow-y:auto;backdrop-filter:blur(8px);}
-#chat-input{width:calc(100% - 16px);padding:6px;margin-top:4px;border-radius:12px;}
-#chat-box div{margin-bottom:6px;font-size:0.9rem;}
+input[type=range]{width:130px;}
+#chat-box{position:absolute;bottom:12px;left:12px;right:12px;max-height:180px;background:rgba(0,0,0,0.25);padding:10px;border-radius:16px;overflow-y:auto;backdrop-filter:blur(10px);}
+#chat-input{width:calc(100% - 16px);padding:8px;margin-top:6px;border-radius:12px;}
+#chat-box div{margin-bottom:6px;font-size:0.95rem;}
 </style>
 </head>
 
 <body>
 <header>ThanhBinh49 AI Pro</header>
-
 <main>
-  <div id="canvas-container">
-    <canvas id="editor"></canvas>
-    <div id="toolbar">
-      <input type="file" id="fileInput" accept="image/*">
-      <input type="range" id="brightness" min="50" max="150" value="100" title="Độ sáng">
-      <input type="range" id="contrast" min="50" max="150" value="100" title="Độ tương phản">
-      <button onclick="applyFilters()">Áp dụng Filter</button>
-      <input type="text" id="textPrompt" placeholder="Mô tả tạo ảnh AI">
-      <button onclick="generateFromText()">Tạo ảnh</button>
-      <button onclick="downloadImage()">Lưu ảnh</button>
-    </div>
+<div id="canvas-container">
+<canvas id="editor"></canvas>
 
-    <div id="chat-box">
-      <input id="chat-input" placeholder="Nhập chat AI..." onkeydown="if(event.key==='Enter'){sendChat()}">
-      <button onclick="sendChat()">Gửi</button>
-    </div>
-  </div>
+<div id="toolbar">
+<input type="file" id="fileInput" accept="image/*">
+<input type="range" id="brightness" min="50" max="150" value="100" title="Độ sáng">
+<input type="range" id="contrast" min="50" max="150" value="100" title="Độ tương phản">
+<button onclick="applyFilters()">Áp dụng Filter</button>
+<input type="text" id="textPrompt" placeholder="Mô tả tạo ảnh AI">
+<button onclick="generateFromText()">Tạo ảnh</button>
+<button onclick="downloadImage()">Lưu ảnh</button>
+</div>
+
+<div id="chat-box">
+<input id="chat-input" placeholder="Nhập chat AI..." onkeydown="if(event.key==='Enter'){sendChat()}">
+<button onclick="sendChat()">Gửi</button>
+</div>
+</div>
 </main>
 
 <script>
 const canvas=document.getElementById('editor');
 const ctx=canvas.getContext('2d');
 let img=new Image();
+
 document.getElementById('fileInput').onchange=e=>{
   const file=e.target.files[0];
   const reader=new FileReader();
