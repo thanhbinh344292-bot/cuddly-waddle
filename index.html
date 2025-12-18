@@ -3,31 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TB49 PRO - SELF DESTRUCT</title>
+    <title>THANHBINH49 - BOOM</title>
     <style>
         body { margin: 0; background: #000; color: #fff; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        .top-nav { background: #111; border-bottom: 2px solid #222; padding: 10px 0; z-index: 99; }
+        .nav { background: #111; border-bottom: 2px solid #222; padding: 10px 0; }
         header { text-align: center; color: #007aff; font-weight: 800; margin-bottom: 8px; }
         .tools { display: flex; gap: 8px; overflow-x: auto; padding: 0 10px; }
-        
         #v { flex: 1; display: flex; align-items: center; justify-content: center; background: #050505; position: relative; }
         canvas { max-width: 100%; max-height: 100%; border: 1px solid #333; }
-
         #chat { height: 150px; background: #000; border-top: 2px solid #222; display: flex; flex-direction: column; }
         #log { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; color: #888; }
         .in-box { display: flex; padding: 10px; gap: 8px; background: #111; }
-        
-        button { background: #222; color: #fff; border: 1px solid #444; padding: 10px 15px; border-radius: 8px; font-weight: 600; white-space: nowrap; }
-        button:active { background: #007aff; }
-        input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; outline: none; }
-        
-        /* Nút tự hủy đỏ rực */
+        button { background: #222; color: #fff; border: 1px solid #444; padding: 10px 15px; border-radius: 8px; font-weight: bold; white-space: nowrap; }
         .btn-boom { background: #ff3b30; color: white; border: none; }
+        input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; outline: none; }
     </style>
 </head>
 <body>
-
-    <div class="top-nav">
+    <div class="nav">
         <header>THANHBINH49 AI PRO</header>
         <div class="tools">
             <button onclick="document.getElementById('f').click()">📂 MỞ</button>
@@ -37,22 +30,18 @@
             <button onclick="sv()" style="background:#007aff; border:none">💾 LƯU</button>
         </div>
     </div>
-
     <div id="v"><canvas id="c"></canvas></div>
     <input type="file" id="f" hidden onchange="ld(event)">
-
     <div id="chat">
-        <div id="log">AI: Cẩn thận với cái nút màu đỏ nha sếp...</div>
+        <div id="log">AI: Hệ thống đã sạc đầy 100% pin!</div>
         <div class="in-box">
-            <input type="text" id="m" placeholder="Vẽ gì đó...">
+            <input type="text" id="m" placeholder="Vẽ gì đó đi sếp...">
             <button onclick="go()" style="background:#007aff; border:none; width:44px; border-radius:8px">🚀</button>
         </div>
     </div>
-
 <script>
     const cv = document.getElementById('c'), x = cv.getContext('2d');
     let ori = null;
-
     function ld(e) {
         const r = new FileReader();
         r.onload = (ev) => {
@@ -60,15 +49,12 @@
             img.onload = () => {
                 const ratio = Math.min(800/img.width, 800/img.height, 1);
                 cv.width = img.width * ratio; cv.height = img.height * ratio;
-                x.drawImage(img, 0, 0, cv.width, cv.height);
-                ori = img;
-                msg("AI", "Đã nhận hàng!");
+                x.drawImage(img, 0, 0, cv.width, cv.height); ori = img;
             };
             img.src = ev.target.result;
         };
         r.readAsDataURL(e.target.files[0]);
     }
-
     function ef(t) {
         if(!ori) return;
         x.drawImage(ori, 0, 0, cv.width, cv.height);
@@ -76,36 +62,31 @@
         for (let i = 0; i < data.length; i += 4) { data[i]*=t; data[i+1]*=t; data[i+2]*=t; }
         x.putImageData(d, 0, 0);
     }
-
-    // NÚT TỰ HỦY: Xóa sạch bách mọi thứ
     function boom() {
-        if(confirm("Sếp chắc chắn muốn 'bốc hơi' hết ảnh không?")) {
-            x.clearRect(0, 0, cv.width, cv.height);
-            ori = null;
-            cv.width = 300; cv.height = 150;
-            document.getElementById('log').innerHTML = "<b>HỆ THỐNG ĐÃ TỰ HỦY!</b>";
-            alert("BÙM! Tan xác pháo.");
+        if(confirm("Bấm là 'Bùm' sạch bách nhé sếp?")) {
+            x.clearRect(0, 0, cv.width, cv.height); ori = null;
+            document.getElementById('log').innerHTML = "<b style='color:red'>HỆ THỐNG ĐÃ BAY MÀU!</b>";
+            alert("BÙM! Đã tự hủy thành công.");
         }
     }
-
     function rs() { if(ori) x.drawImage(ori, 0, 0, cv.width, cv.height); }
     function sv() { const a = document.createElement('a'); a.download='tb49.png'; a.href=cv.toDataURL(); a.click(); }
-
     async function go() {
         const i = document.getElementById('m'), v = i.value.trim();
         if(!v) return; msg("Sếp", v); i.value = '';
         if(v.toLowerCase().includes("vẽ")) {
-            msg("AI", "Đang múa cọ...");
+            msg("AI", "Đang nạp pin vẽ...");
             const aimg = new Image(); aimg.crossOrigin = "anonymous";
             aimg.src = `https://pollinations.ai/p/${encodeURIComponent(v)}?width=800&height=800&seed=${Math.random()}`;
             aimg.onload = () => {
                 cv.width = 800; cv.height = 800;
                 x.drawImage(aimg, 0, 0, 800, 800); ori = aimg;
-                msg("AI", "Hàng về sếp ơi!");
+                msg("AI", "Pin đầy! Ảnh ra lò rồi sếp.");
+                const s = new SpeechSynthesisUtterance("Xong rồi sếp");
+                s.lang = 'vi-VN'; window.speechSynthesis.speak(s);
             };
-        } else { msg("AI", "Dạ sếp!"); }
+        } else { msg("AI", "Em đây sếp!"); }
     }
-
     function msg(s, m) {
         const l = document.getElementById('log');
         l.innerHTML += `<div><b>${s}:</b> ${m}</div>`;
