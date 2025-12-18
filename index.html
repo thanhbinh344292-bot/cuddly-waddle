@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="manifest.json">
     <title>TB49 AI PRO</title>
     <style>
         body { margin: 0; background: #000; color: #fff; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         header { padding: 15px; text-align: center; color: #007aff; font-weight: 800; border-bottom: 1px solid #222; }
-        #v { flex: 1; display: flex; align-items: center; justify-content: center; background: #0a0a0a; padding: 10px; position: relative; }
-        canvas { max-width: 100%; max-height: 100%; border-radius: 12px; border: 2px solid #333; }
+        #v { flex: 1; display: flex; align-items: center; justify-content: center; background: #0a0a0a; padding: 10px; }
+        canvas { max-width: 100%; max-height: 100%; border-radius: 12px; border: 1px solid #333; }
         .tools { padding: 12px; display: flex; gap: 10px; overflow-x: auto; background: #111; border-top: 1px solid #222; }
         button { background: #222; color: #fff; border: 1px solid #444; padding: 12px 18px; border-radius: 10px; font-weight: 600; white-space: nowrap; }
         button:active { background: #007aff; }
@@ -22,18 +23,19 @@
     <header>THANHBINH49 AI PRO</header>
     <div id="v"><canvas id="c"></canvas></div>
     <div class="tools">
-        <button onclick="document.getElementById('f').click()">📂 MỞ ẢNH</button>
-        <button onclick="ef(1.6)" style="color:#ffcc00">🔥 BOOST</button>
-        <button onclick="ef(0.7)" style="color:#007aff">🌙 TỐI</button>
+        <button onclick="document.getElementById('f').click()">📂 MỞ</button>
+        <button onclick="ef('boost')" style="color:#ffcc00">🔥 BOOST</button>
+        <button onclick="ef('bw')">🌓 TRẮNG ĐEN</button>
+        <button onclick="ef('cartoon')">🎨 ART</button>
         <button onclick="rs()">🔄 RESET</button>
         <button onclick="sv()" style="background:#007aff; border:none">💾 LƯU</button>
     </div>
-    <input type="file" id="f" hidden accept="image/*" onchange="ld(event)">
+    <input type="file" id="f" hidden onchange="ld(event)">
     <div id="chat">
-        <div id="log">AI: Sếp Bình Pro đã trở lại! Thử gõ "vẽ..." xem nào.</div>
+        <div id="log">AI: Đã sẵn sàng phục vụ sếp Bình!</div>
         <div class="in-box">
-            <input type="text" id="m" placeholder="Vẽ gì đó hoặc tâm sự...">
-            <button onclick="go()" style="border-radius:50%; width:44px; height:44px; padding:0; background:#007aff; border:none">🚀</button>
+            <input type="text" id="m" placeholder="Chat hoặc gõ 'vẽ con rồng'...">
+            <button onclick="go()" style="border-radius:50%; width:44px; height:44px; background:#007aff; border:none">🚀</button>
         </div>
     </div>
 
@@ -51,26 +53,32 @@
                 if(w > max || h > max) { const s = Math.min(max/w, max/h); w *= s; h *= s; }
                 cv.width = w; cv.height = h;
                 x.drawImage(img, 0, 0, w, h); ori = img;
-                msg("AI", "Đã nạp ảnh sếp ơi!");
+                msg("AI", "Đã nhận hàng của sếp!");
             };
             img.src = ev.target.result;
         };
         r.readAsDataURL(e.target.files[0]);
     }
 
-    // Hàm xử lý Pixel siêu mạnh đã test thành công
-    function ef(lv) {
-        if(!ori) return msg("AI", "Chưa có ảnh sếp!");
+    function ef(type) {
+        if(!ori) return msg("AI", "Sếp chưa chọn ảnh!");
         x.drawImage(ori, 0, 0, cv.width, cv.height);
         const imgD = x.getImageData(0, 0, cv.width, cv.height);
         const d = imgD.data;
         for (let i = 0; i < d.length; i += 4) {
-            d[i] = Math.min(255, d[i] * lv);
-            d[i+1] = Math.min(255, d[i+1] * lv);
-            d[i+2] = Math.min(255, d[i+2] * lv);
+            if(type === 'boost') {
+                d[i] *= 1.5; d[i+1] *= 1.5; d[i+2] *= 1.5;
+            } else if(type === 'bw') {
+                let avg = (d[i] + d[i+1] + d[i+2]) / 3;
+                d[i] = d[i+1] = d[i+2] = avg;
+            } else if(type === 'cartoon') {
+                d[i] = d[i] > 128 ? 255 : 50;
+                d[i+1] = d[i+1] > 128 ? 255 : 50;
+                d[i+2] = d[i+2] > 128 ? 255 : 50;
+            }
         }
         x.putImageData(imgD, 0, 0);
-        msg("AI", lv > 1 ? "Đã độ sáng rực rỡ!" : "Đã hạ tông màu!");
+        msg("AI", "Đã thi triển xong hiệu ứng " + type + "!");
     }
 
     function rs() { if(ori) { x.drawImage(ori, 0, 0, cv.width, cv.height); msg("AI", "Về nguyên bản!"); } }
@@ -78,16 +86,16 @@
 
     async function go() {
         const i = document.getElementById('m'), v = i.value.trim();
-        if(!v) return; msg("Bạn", v); i.value = '';
+        if(!v) return; msg("Sếp", v); i.value = '';
         if(v.toLowerCase().includes("vẽ")) {
-            msg("AI", "Đang múa cọ, sếp đợi tí...");
+            msg("AI", "Đang múa cọ...");
             const aimg = new Image(); aimg.crossOrigin = "anonymous";
             aimg.src = "https://pollinations.ai/p/" + encodeURIComponent(v) + "?width=1024&height=1024&seed=" + Math.random();
             aimg.onload = () => {
                 cv.width = 1024; cv.height = 1024;
                 x.drawImage(aimg, 0, 0, 1024, 1024); ori = aimg;
-                msg("AI", "Xong rồi sếp!");
-                speak("Xong rồi nè sếp ơi");
+                msg("AI", "Tác phẩm của sếp đây!");
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance("Xong rồi sếp"));
             };
         } else { msg("AI", "Dạ em nghe sếp!"); }
     }
@@ -96,11 +104,6 @@
         const l = document.getElementById('log');
         l.innerHTML += `<div><b>${s}:</b> ${m}</div>`;
         l.scrollTop = l.scrollHeight;
-    }
-
-    function speak(t) {
-        const u = new SpeechSynthesisUtterance(t);
-        u.lang = 'vi-VN'; window.speechSynthesis.speak(u);
     }
 </script>
 </body>
