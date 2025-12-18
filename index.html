@@ -1,4 +1,146 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ThanhBinh49 AI</title>
+
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:#0f172a;
+  color:white;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+header{
+  padding:14px;
+  text-align:center;
+  font-weight:600;
+  font-size:18px;
+  background:linear-gradient(135deg,#6366f1,#22d3ee);
+}
+main{
+  flex:1;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+canvas{
+  width:100%;
+  max-height:45vh;
+  background:#000;
+  border-radius:14px;
+}
+.panel{
+  background:#020617;
+  border-radius:14px;
+  padding:10px;
+}
+input,button{
+  width:100%;
+  margin-top:6px;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  font-size:15px;
+}
+button{
+  background:linear-gradient(135deg,#6366f1,#22d3ee);
+  color:white;
+  font-weight:600;
+}
+.chat{
+  max-height:140px;
+  overflow:auto;
+  font-size:14px;
+}
+.chat div{margin-bottom:6px}
+</style>
+</head>
+
+<body>
+<header>ThanhBinh49 AI</header>
+
+<main>
+  <canvas id="c"></canvas>
+
+  <div class="panel">
+    <input type="file" id="img" accept="image/*">
+    <input type="range" id="bright" min="50" max="150" value="100">
+    <button onclick="apply()">Chỉnh ảnh</button>
+    <button onclick="save()">Lưu ảnh</button>
+  </div>
+
+  <div class="panel">
+    <div class="chat" id="chat"></div>
+    <input id="q" placeholder="Nói chuyện với AI…">
+    <button onclick="ask()">Gửi</button>
+  </div>
+</main>
+
+<script>
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+let img = new Image();
+
+document.getElementById("img").onchange = e=>{
+  const r = new FileReader();
+  r.onload = x=>{
+    img.onload = ()=>{
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img,0,0);
+    };
+    img.src = x.target.result;
+  };
+  r.readAsDataURL(e.target.files[0]);
+};
+
+function apply(){
+  if(!img.src) return;
+  ctx.drawImage(img,0,0);
+  let d = ctx.getImageData(0,0,canvas.width,canvas.height);
+  let b = document.getElementById("bright").value/100;
+  for(let i=0;i<d.data.length;i+=4){
+    d.data[i]*=b;
+    d.data[i+1]*=b;
+    d.data[i+2]*=b;
+  }
+  ctx.putImageData(d,0,0);
+}
+
+function save(){
+  const a=document.createElement("a");
+  a.href=canvas.toDataURL();
+  a.download="ThanhBinh49.png";
+  a.click();
+}
+
+/* CHAT AI – KHÔNG API (demo local) */
+function ask(){
+  const q=document.getElementById("q");
+  if(!q.value) return;
+  const chat=document.getElementById("chat");
+  chat.innerHTML+=`<div><b>Bạn:</b> ${q.value}</div>`;
+  const reply="Mình đang ở chế độ offline, nhưng giao diện này đã sẵn sàng cho AI thật.";
+  chat.innerHTML+=`<div><b>AI:</b> ${reply}</div>`;
+  const u=new SpeechSynthesisUtterance(reply);
+  u.lang="vi-VN";
+  speechSynthesis.speak(u);
+  q.value="";
+}
+</script>
+</body>
+</html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
