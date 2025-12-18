@@ -3,83 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TB49 AI PRO</title>
+    <title>TB49 AI PRO v3.0</title>
     <style>
         body { margin: 0; background: #000; color: #fff; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        header { padding: 15px; text-align: center; color: #007aff; font-weight: 800; border-bottom: 1px solid #222; }
-        #v { flex: 1; display: flex; align-items: center; justify-content: center; background: #0a0a0a; padding: 10px; }
-        canvas { max-width: 100%; max-height: 100%; border-radius: 10px; box-shadow: 0 0 30px rgba(0,122,255,0.2); }
-        .tools { padding: 10px; display: flex; gap: 8px; overflow-x: auto; background: #111; border-top: 1px solid #222; }
-        button { background: #222; color: #fff; border: 1px solid #333; padding: 12px 18px; border-radius: 10px; font-weight: 600; white-space: nowrap; }
-        button:active { background: #007aff; }
+        header { padding: 12px; text-align: center; color: #007aff; font-weight: 800; border-bottom: 1px solid #222; font-size: 1.1rem; }
+        #v { flex: 1; display: flex; align-items: center; justify-content: center; background: #0a0a0a; padding: 10px; overflow: hidden; }
+        canvas { max-width: 100%; max-height: 100%; border-radius: 12px; box-shadow: 0 0 20px rgba(0,122,255,0.3); background: #111; }
+        .tools { padding: 12px; display: flex; gap: 10px; overflow-x: auto; background: #111; border-top: 1px solid #222; -webkit-overflow-scrolling: touch; }
+        button { background: #222; color: #fff; border: 1px solid #333; padding: 12px 20px; border-radius: 12px; font-weight: 600; white-space: nowrap; font-size: 14px; }
+        button:active { background: #007aff; transform: scale(0.95); }
         #chat { height: 160px; background: #000; border-top: 1px solid #222; display: flex; flex-direction: column; }
-        #log { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; color: #888; }
-        .input-box { display: flex; padding: 8px; gap: 8px; background: #111; }
-        input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; outline: none; }
+        #log { flex: 1; overflow-y: auto; padding: 12px; font-size: 13px; color: #999; line-height: 1.4; }
+        .input-box { display: flex; padding: 10px; gap: 8px; background: #111; border-top: 1px solid #222; }
+        input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; outline: none; font-size: 16px; }
     </style>
 </head>
 <body>
+
     <header>THANHBINH49 AI PRO</header>
+
     <div id="v"><canvas id="c"></canvas></div>
+
     <div class="tools">
         <button onclick="document.getElementById('f').click()">📂 MỞ ẢNH</button>
-        <button onclick="ef('brightness(1.8) contrast(1.2)')" style="color:#ffcc00">🔥 BOOST</button>
-        <button onclick="ef('sepia(0.8) hue-rotate(-30deg)')">🍂 WARM</button>
+        <button onclick="ef()" style="color:#ffcc00; border-color:#ffcc00;">🔥 BOOST</button>
         <button onclick="rs()">🔄 RESET</button>
-        <button onclick="sv()" style="background:#007aff; border:none">💾 LƯU</button>
+        <button onclick="sv()" style="background:#007aff; border:none;">💾 LƯU ẢNH</button>
     </div>
+
     <input type="file" id="f" hidden accept="image/*" onchange="ld(event)">
+
     <div id="chat">
-        <div id="log"><b>AI:</b> Hệ thống đã reset sạch sẽ. Mời sếp ra lệnh!</div>
+        <div id="log"><b>AI:</b> Đã sẵn sàng "độ" ảnh cho sếp Bình!</div>
         <div class="input-box">
-            <input type="text" id="m" placeholder="Vẽ gì đó hoặc chat...">
-            <button onclick="go()" style="border-radius:50%; width:44px; padding:0">🚀</button>
+            <input type="text" id="m" placeholder="Vẽ gì đó (VD: vẽ con rồng)...">
+            <button onclick="go()" style="border-radius:50%; width:46px; height:46px; padding:0; background:#007aff; border:none;">🚀</button>
         </div>
     </div>
+
 <script>
     const cv = document.getElementById('c'), x = cv.getContext('2d');
     let ori = null;
 
+    // 1. Nạp ảnh
     function ld(e) {
         const r = new FileReader();
         r.onload = (ev) => {
             const img = new Image();
             img.onload = () => {
-                cv.width = img.width; cv.height = img.height;
-                x.filter = 'none'; x.drawImage(img, 0, 0); ori = img;
-                msg("AI", "Đã nạp ảnh. Bấm BOOST thử đi sếp!");
+                const max = 1200; // Giới hạn kích thước để iPhone ko bị lag
+                let w = img.width, h = img.height;
+                if(w > max || h > max) { const s = Math.min(max/w, max/h); w *= s; h *= s; }
+                cv.width = w; cv.height = h;
+                x.clearRect(0, 0, w, h);
+                x.drawImage(img, 0, 0, w, h);
+                ori = img;
+                msg("AI", "Đã nạp ảnh xong!");
             };
             img.src = ev.target.result;
         };
         r.readAsDataURL(e.target.files[0]);
     }
 
-    function ef(f) {
-        if(!ori) return msg("AI", "Chưa có ảnh sếp ơi!");
-        x.clearRect(0, 0, cv.width, cv.height);
-        x.filter = f;
-        x.drawImage(ori, 0, 0);
-        x.filter = 'none';
-        msg("AI", "Đã thực hiện hiệu ứng!");
+    // 2. Hàm Boost (Dùng Pixel Manipulation - Chấp mọi loại iPhone)
+    function ef() {
+        if(!ori) return msg("AI", "Sếp ơi, chưa chọn ảnh mà!");
+        x.drawImage(ori, 0, 0, cv.width, cv.height); // Vẽ lại ảnh gốc
+        
+        const imgData = x.getImageData(0, 0, cv.width, cv.height);
+        const d = imgData.data;
+        
+        for (let i = 0; i < d.length; i += 4) {
+            d[i] = Math.min(255, d[i] * 1.6);     // R
+            d[i+1] = Math.min(255, d[i+1] * 1.6); // G
+            d[i+2] = Math.min(255, d[i+2] * 1.6); // B
+        }
+        x.putImageData(imgData, 0, 0);
+        msg("AI", "Đã ép sáng! Sếp thấy rõ chưa?");
     }
 
-    function rs() { if(ori) { x.filter='none'; x.drawImage(ori, 0, 0); msg("AI", "Đã về nguyên bản."); } }
-    function sv() { const a = document.createElement('a'); a.download='tb49.png'; a.href=cv.toDataURL(); a.click(); }
+    // 3. Reset & Lưu
+    function rs() { if(ori) { x.drawImage(ori, 0, 0, cv.width, cv.height); msg("AI", "Về zin!"); } }
+    function sv() { const a = document.createElement('a'); a.download='tb49.png'; a.href=cv.toDataURL('image/png'); a.click(); }
 
+    // 4. AI Vẽ Ảnh
     async function go() {
         const i = document.getElementById('m'), v = i.value.trim();
         if(!v) return; msg("Bạn", v); i.value = '';
         if(v.toLowerCase().includes("vẽ")) {
-            msg("AI", "Đang vẽ...");
+            msg("AI", "Đang múa cọ, sếp đợi tí...");
             const aimg = new Image(); aimg.crossOrigin = "anonymous";
-            aimg.src = "https://pollinations.ai/p/" + encodeURIComponent(v) + "?seed=" + Math.random();
+            aimg.src = "https://pollinations.ai/p/" + encodeURIComponent(v) + "?width=1024&height=1024&seed=" + Math.random();
             aimg.onload = () => {
                 cv.width = 1024; cv.height = 1024;
-                x.filter = 'none'; x.drawImage(aimg, 0, 0); ori = aimg;
-                msg("AI", "Xong! Hàng của sếp đây.");
-                window.speechSynthesis.speak(new SpeechSynthesisUtterance("Xong rồi sếp ơi"));
+                x.drawImage(aimg, 0, 0, 1024, 1024);
+                ori = aimg;
+                msg("AI", "Xong! Tác phẩm đây sếp.");
+                const s = new SpeechSynthesisUtterance("Xong rồi sếp");
+                s.lang = 'vi-VN'; window.speechSynthesis.speak(s);
             };
-        } else { msg("AI", "Dạ em nghe nè sếp!"); }
+        } else { msg("AI", "Dạ em nghe nè sếp Bình!"); }
     }
 
     function msg(s, m) {
