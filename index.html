@@ -1,410 +1,142 @@
-<!DOCTYPE html><!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>ThanhBinh49 AI</title>
-
-<meta name="theme-color" content="#0f172a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-<style>
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background:#0f172a;
-  color:white;
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-}
-header{
-  padding:14px;
-  text-align:center;
-  font-weight:600;
-  font-size:18px;
-  background:linear-gradient(135deg,#6366f1,#22d3ee);
-}
-main{
-  flex:1;
-  padding:10px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-canvas{
-  width:100%;
-  max-height:45vh;
-  background:#000;
-  border-radius:14px;
-}
-.panel{
-  background:#020617;
-  border-radius:14px;
-  padding:10px;
-}
-input,button{
-  width:100%;
-  margin-top:6px;
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  font-size:15px;
-}
-button{
-  background:linear-gradient(135deg,#6366f1,#22d3ee);
-  color:white;
-  font-weight:600;
-}
-.chat{
-  max-height:140px;
-  overflow:auto;
-  font-size:14px;
-}
-.chat div{margin-bottom:6px}
-</style>
-</head>
-
-<body>
-<header>ThanhBinh49 AI</header>
-
-<main>
-  <canvas id="c"></canvas>
-
-  <div class="panel">
-    <input type="file" id="img" accept="image/*">
-    <input type="range" id="bright" min="50" max="150" value="100">
-    <button onclick="apply()">Chỉnh ảnh</button>
-    <button onclick="save()">Lưu ảnh</button>
-  </div>
-
-  <div class="panel">
-    <div class="chat" id="chat"></div>
-    <input id="q" placeholder="Nói chuyện với AI…">
-    <button onclick="ask()">Gửi</button>
-  </div>
-</main>
-
-<script>
-const canvas = document.getElementById("c");
-const ctx = canvas.getContext("2d");
-let img = new Image();
-
-document.getElementById("img").onchange = e=>{
-  const r = new FileReader();
-  r.onload = x=>{
-    img.onload = ()=>{
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img,0,0);
-    };
-    img.src = x.target.result;
-  };
-  r.readAsDataURL(e.target.files[0]);
-};
-
-function apply(){
-  if(!img.src) return;
-  ctx.drawImage(img,0,0);
-  let d = ctx.getImageData(0,0,canvas.width,canvas.height);
-  let b = document.getElementById("bright").value/100;
-  for(let i=0;i<d.data.length;i+=4){
-    d.data[i]*=b;
-    d.data[i+1]*=b;
-    d.data[i+2]*=b;
-  }
-  ctx.putImageData(d,0,0);
-}
-
-function save(){
-  const a=document.createElement("a");
-  a.href=canvas.toDataURL();
-  a.download="ThanhBinh49.png";
-  a.click();
-}
-
-/* CHAT AI – KHÔNG API (demo local) */
-function ask(){
-  const q=document.getElementById("q");
-  if(!q.value) return;
-  const chat=document.getElementById("chat");
-  chat.innerHTML+=`<div><b>Bạn:</b> ${q.value}</div>`;
-  const reply="Mình đang ở chế độ offline, nhưng giao diện này đã sẵn sàng cho AI thật.";
-  chat.innerHTML+=`<div><b>AI:</b> ${reply}</div>`;
-  const u=new SpeechSynthesisUtterance(reply);
-  u.lang="vi-VN";
-  speechSynthesis.speak(u);
-  q.value="";
-}
-</script>
-</body>
-</html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ThanhBinh49 AI Pro</title>
+
+<meta name="theme-color" content="#1E1E2F">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-<meta http-equiv="Pragma" content="no-cache" />
-<meta http-equiv="Expires" content="0" />
+
 <style>
-/* --- Reset & Font --- */
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;-webkit-tap-highlight-color:transparent;}
-body{background:#f5f5f7;color:#1E1E2F;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
-
-/* --- Header --- */
-header{background:#1E1E2F;color:white;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 5px rgba(0,0,0,0.3);}
-header h1{font-size:1.5rem;}
-header button{background:#4ECDC4;border:none;border-radius:6px;padding:6px 10px;color:white;font-weight:bold;font-size:0.9rem;cursor:pointer;transition:0.2s;}
-header button:hover{background:#3bb3a2;}
-
-/* --- Main Layout --- */
-main{flex:1;display:flex;overflow:hidden;}
-#sidebar{width:280px;background:#2C2C3E;color:white;padding:15px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;box-shadow:2px 0 5px rgba(0,0,0,0.2);}
-#sidebar button,input[type=text],input[type=range]{border:none;border-radius:6px;padding:8px;font-weight:bold;font-size:0.9rem;cursor:pointer;transition:0.2s;}
-#sidebar button{background:#4ECDC4;color:white;}
-#sidebar button:hover{background:#3bb3a2;}
-.slider-container{display:flex;flex-direction:column;gap:4px;}
-.filter-btn{background:#FF6B6B;color:white;padding:8px;font-weight:bold;font-size:0.9rem;cursor:pointer;border-radius:5px;transition:0.2s;}
-.filter-btn:hover{background:#e35a5a;}
-
-/* --- Canvas --- */
-#canvas-container{flex:1;background:#fff;display:flex;justify-content:center;align-items:center;position:relative;overflow:hidden;}
-#editor{border:2px solid #1E1E2F;border-radius:6px;touch-action:none;max-width:100%;max-height:100%;}
-
-/* --- Chat --- */
-#chat-box{flex:1;background:#fff;color:#000;padding:8px;overflow-y:auto;height:180px;border-radius:6px;margin-top:5px;font-size:0.85rem;}
-#chat-input{width:100%;padding:6px;border-radius:5px;border:1px solid #ccc;margin-top:5px;}
-
-/* --- Footer --- */
-footer{background:#1E1E2F;color:white;text-align:center;padding:10px;font-size:0.85rem;box-shadow:0 -2px 5px rgba(0,0,0,0.3);}
-
-/* --- Responsive --- */
-@media(max-width:768px){
-  main{flex-direction:column;}
-  #sidebar{width:100%;height:50vh;}
-  #canvas-container{height:50vh;}
-}
+body{margin:0;font-family:'Inter',sans-serif;background:#0f172a;color:white;display:flex;flex-direction:column;height:100vh;}
+header{padding:16px;text-align:center;font-weight:700;font-size:1.5rem;background:linear-gradient(135deg,#6366f1,#22d3ee);box-shadow:0 2px 8px rgba(0,0,0,0.3);border-bottom-left-radius:12px;border-bottom-right-radius:12px;}
+main{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px;gap:10px;}
+#canvas-container{position:relative;width:100%;display:flex;justify-content:center;align-items:center;}
+canvas{border-radius:16px;max-width:95%;max-height:50vh;box-shadow:0 8px 16px rgba(0,0,0,0.4);}
+#toolbar{position:absolute;top:10px;right:10px;background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:6px;}
+button,input[type=text],input[type=range]{border:none;border-radius:12px;padding:8px;font-size:0.95rem;cursor:pointer;transition:0.2s;}
+button{background:linear-gradient(135deg,#6366f1,#22d3ee);color:white;font-weight:600;}
+button:hover{opacity:0.9;}
+input[type=range]{width:120px;}
+#chat-box{position:absolute;bottom:10px;left:10px;right:10px;max-height:180px;background:rgba(0,0,0,0.3);padding:8px;border-radius:16px;overflow-y:auto;backdrop-filter:blur(8px);}
+#chat-input{width:calc(100% - 16px);padding:6px;margin-top:4px;border-radius:12px;}
+#chat-box div{margin-bottom:6px;font-size:0.9rem;}
 </style>
 </head>
-<body>
 
-<header>
-<h1>ThanhBinh49 AI Pro</h1>
-<button onclick="location.reload()">Tải lại</button>
-</header>
+<body>
+<header>ThanhBinh49 AI Pro</header>
 
 <main>
-<div id="sidebar">
-<button onclick="uploadImage()">Tải ảnh lên</button>
+  <div id="canvas-container">
+    <canvas id="editor"></canvas>
+    <div id="toolbar">
+      <input type="file" id="fileInput" accept="image/*">
+      <input type="range" id="brightness" min="50" max="150" value="100" title="Độ sáng">
+      <input type="range" id="contrast" min="50" max="150" value="100" title="Độ tương phản">
+      <button onclick="applyFilters()">Áp dụng Filter</button>
+      <input type="text" id="textPrompt" placeholder="Mô tả tạo ảnh AI">
+      <button onclick="generateFromText()">Tạo ảnh</button>
+      <button onclick="downloadImage()">Lưu ảnh</button>
+    </div>
 
-<div class="slider-container">
-<label>Độ sáng</label>
-<input type="range" id="brightness" min="0" max="200" value="100" oninput="applyFilters()">
-</div>
-<div class="slider-container">
-<label>Độ tương phản</label>
-<input type="range" id="contrast" min="0" max="200" value="100" oninput="applyFilters()">
-</div>
-<div class="slider-container">
-<label>Độ bão hòa</label>
-<input type="range" id="saturation" min="0" max="200" value="100" oninput="applyFilters()">
-</div>
-
-<label>Bộ lọc sẵn</label>
-<button class="filter-btn" onclick="applyPreset('none')">Mặc định</button>
-<button class="filter-btn" onclick="applyPreset('warm')">Ấm áp</button>
-<button class="filter-btn" onclick="applyPreset('cool')">Lạnh</button>
-<button class="filter-btn" onclick="applyPreset('cinematic')">Điện ảnh</button>
-<button class="filter-btn" onclick="applyPreset('mono')">Đen trắng</button>
-
-<hr>
-
-<label>Xoay / Lật</label>
-<button onclick="rotateCanvas(90)">Xoay 90°</button>
-<button onclick="rotateCanvas(180)">Xoay 180°</button>
-<button onclick="flipCanvas('horizontal')">Lật ngang</button>
-<button onclick="flipCanvas('vertical')">Lật dọc</button>
-
-<hr>
-
-<label>Xóa nền thủ công</label>
-<input type="range" id="brushSize" min="5" max="50" value="10">
-<button onclick="applyRemoveMask()">Xóa nền</button>
-<button onclick="undoMask()">Undo mask</button>
-
-<hr>
-
-<label>Tạo ảnh từ văn bản</label>
-<input type="text" id="textPrompt" placeholder="Nhập mô tả...">
-<button onclick="generateFromText()">Tạo ảnh</button>
-
-<hr>
-
-<label>Trợ lý AI</label>
-<div id="chat-box"></div>
-<input type="text" id="chat-input" placeholder="Nhập câu hỏi..." onkeydown="if(event.key==='Enter'){sendChat()}">
-<button onclick="sendChat()">Gửi</button>
-
-<hr>
-
-<button onclick="undo()">Hoàn tác</button>
-<button onclick="redo()">Làm lại</button>
-<button onclick="downloadImage()">Lưu ảnh</button>
-</div>
-
-<div id="canvas-container">
-<canvas id="editor"></canvas>
-</div>
+    <div id="chat-box">
+      <input id="chat-input" placeholder="Nhập chat AI..." onkeydown="if(event.key==='Enter'){sendChat()}">
+      <button onclick="sendChat()">Gửi</button>
+    </div>
+  </div>
 </main>
 
-<footer>ThanhBinh49 AI Pro - iPhone friendly + Mobile App Style</footer>
-
-<input type="file" id="fileInput" style="display:none" accept="image/*">
-
 <script>
-/* --- Core Variables --- */
-let canvas=document.getElementById('editor'), ctx=canvas.getContext('2d'), img=new Image();
-let history=[],historyIndex=-1, maskHistory=[], maskHistoryIndex=-1;
-let currentPreset='none', brushSize=10;
-let maskPixels=[], isMasking=false;
-
-/* --- Upload --- */
-function uploadImage(){ document.getElementById('fileInput').click(); }
-document.getElementById('fileInput').onchange=function(e){
-  let file=e.target.files[0], reader=new FileReader();
-  reader.onload=function(ev){
-    img.onload=function(){
-      canvas.width=img.width>1000?1000:img.width;
-      canvas.height=img.height>700?700:img.height;
+const canvas=document.getElementById('editor');
+const ctx=canvas.getContext('2d');
+let img=new Image();
+document.getElementById('fileInput').onchange=e=>{
+  const file=e.target.files[0];
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    img.onload=()=>{
+      canvas.width=img.width>500?500:img.width;
+      canvas.height=img.height>500?500:img.height;
       ctx.drawImage(img,0,0,canvas.width,canvas.height);
-      saveHistory();
-    }
+    };
     img.src=ev.target.result;
-  }
+  };
   reader.readAsDataURL(file);
-}
+};
 
-/* --- Filters & Presets --- */
 function applyFilters(){
   if(!img.src) return;
-  ctx.drawImage(img,0,0,canvas.width,canvas.height);
-  let b=document.getElementById('brightness').value/100,
-      c=document.getElementById('contrast').value/100,
-      s=document.getElementById('saturation').value/100;
-  let imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
-  let d=imgData.data;
-  for(let i=0;i<d.length;i+=4){
-    d[i]*=b; d[i+1]*=b; d[i+2]*=b;
-    d[i]=((d[i]-128)*c)+128; d[i+1]=((d[i+1]-128)*c)+128; d[i+2]=((d[i+2]-128)*c)+128;
-    let avg=(d[i]+d[i+1]+d[i+2])/3;
-    d[i]=avg+(d[i]-avg)*s; d[i+1]=avg+(d[i+1]-avg)*s; d[i+2]=avg+(d[i+2]-avg)*s;
+  ctx.drawImage(img,0,0);
+  let data=ctx.getImageData(0,0,canvas.width,canvas.height);
+  let b=document.getElementById('brightness').value/100;
+  let c=document.getElementById('contrast').value/100;
+  for(let i=0;i<data.data.length;i+=4){
+    data.data[i]*=b;
+    data.data[i+1]*=b;
+    data.data[i+2]*=b;
+    data.data[i]=((data.data[i]-128)*c)+128;
+    data.data[i+1]=((data.data[i+1]-128)*c)+128;
+    data.data[i+2]=((data.data[i+2]-128)*c)+128;
   }
-  ctx.putImageData(imgData,0,0);
-  applyPreset(currentPreset);
-  saveHistory();
+  ctx.putImageData(data,0,0);
 }
 
-function applyPreset(name){
-  currentPreset=name;
-  if(!img.src) return;
-  let imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
-  let d=imgData.data;
-  for(let i=0;i<d.length;i+=4){
-    let r=d[i],g=d[i+1],b=d[i+2];
-    switch(name){
-      case 'warm': d[i]+=20; d[i+1]+=10; break;
-      case 'cool': d[i]-=10; d[i+1]-=5; d[i+2]+=20; break;
-      case 'cinematic': d[i]*=1.1; d[i+1]*=0.95; d[i+2]*=0.9; break;
-      case 'mono': let avg=(r+g+b)/3; d[i]=d[i+1]=d[i+2]=avg; break;
+function downloadImage(){
+  const a=document.createElement('a');
+  a.href=canvas.toDataURL();
+  a.download='ThanhBinh49.png';
+  a.click();
+}
+
+// AI Proxy URL
+const PROXY_URL="YOUR_PROXY_URL"; // Thay bằng server proxy Node.js
+
+async function generateFromText(){
+  const prompt=document.getElementById('textPrompt').value;
+  if(!prompt) return alert("Nhập mô tả!");
+  try{
+    const res=await fetch(PROXY_URL+'/text-to-image',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt})
+    });
+    const data=await res.json();
+    if(data.image){
+      const newImg=new Image();
+      newImg.onload=()=>{
+        canvas.width=newImg.width;
+        canvas.height=newImg.height;
+        ctx.drawImage(newImg,0,0);
+      };
+      newImg.src=data.image;
     }
-  }
-  ctx.putImageData(imgData,0,0);
-  saveHistory();
+  }catch(e){alert('Lỗi tạo ảnh AI: '+e.message);}
 }
 
-/* --- Undo / Redo --- */
-function saveHistory(){ if(historyIndex<history.length-1) history.splice(historyIndex+1); history.push(canvas.toDataURL()); historyIndex=history.length-1; }
-function undo(){ if(historyIndex>0){ historyIndex--; loadHistory(); } }
-function redo(){ if(historyIndex<history.length-1){ historyIndex++; loadHistory(); } }
-function loadHistory(){ let imgH=new Image(); imgH.src=history[historyIndex]; imgH.onload=()=>{ ctx.drawImage(imgH,0,0,canvas.width,canvas.height); } }
-
-/* --- Canvas Transform --- */
-function rotateCanvas(deg){
-  if(!img.src) return;
-  const tempCanvas=document.createElement('canvas');
-  const tCtx=tempCanvas.getContext('2d');
-  if(deg%180===0){ tempCanvas.width=canvas.width; tempCanvas.height=canvas.height; }
-  else{ tempCanvas.width=canvas.height; tempCanvas.height=canvas.width; }
-  tCtx.translate(tempCanvas.width/2,tempCanvas.height/2);
-  tCtx.rotate(deg*Math.PI/180);
-  tCtx.drawImage(canvas,-canvas.width/2,-canvas.height/2);
-  canvas.width=tempCanvas.width; canvas.height=tempCanvas.height;
-  ctx.drawImage(tempCanvas,0,0);
-  saveHistory();
+async function sendChat(){
+  const q=document.getElementById('chat-input');
+  if(!q.value) return;
+  const chat=document.getElementById('chat-box');
+  chat.innerHTML+=`<div><b>Bạn:</b> ${q.value}</div>`;
+  const prompt=q.value;
+  q.value='';
+  try{
+    const res=await fetch(PROXY_URL+'/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt})
+    });
+    const data=await res.json();
+    chat.innerHTML+=`<div><b>AI:</b> ${data.answer||'Không có phản hồi'}</div>`;
+    chat.scrollTop=chat.scrollHeight;
+    const u=new SpeechSynthesisUtterance(data.answer||'');
+    u.lang='vi-VN';
+    speechSynthesis.speak(u);
+  }catch(e){alert('Lỗi chat AI: '+e.message);}
 }
-function flipCanvas(dir){
-  if(!img.src) return;
-  ctx.save();
-  if(dir==='horizontal'){ ctx.translate(canvas.width,0); ctx.scale(-1,1); }
-  else{ ctx.translate(0,canvas.height); ctx.scale(1,-1); }
-  ctx.drawImage(canvas,0,0);
-  ctx.restore();
-  saveHistory();
-}
-
-/* --- Mask / Xóa nền --- */
-canvas.addEventListener('pointerdown',e=>{ isMasking=true; drawMask(e); });
-canvas.addEventListener('pointermove',e=>{ if(isMasking) drawMask(e); });
-canvas.addEventListener('pointerup',()=>{ isMasking=false; });
-
-function drawMask(e){
-  const rect=canvas.getBoundingClientRect();
-  const x=Math.floor((e.clientX-rect.left)*(canvas.width/rect.width));
-  const y=Math.floor((e.clientY-rect.top)*(canvas.height/rect.height));
-  maskPixels.push({x,y});
-  brushSize=parseInt(document.getElementById('brushSize').value);
-  ctx.fillStyle='rgba(255,0,0,0.5)';
-  ctx.beginPath(); ctx.arc(x,y,brushSize,0,Math.PI*2); ctx.fill();
-}
-function applyRemoveMask(){
-  if(maskPixels.length===0) return alert("Chọn vùng đỏ muốn xóa!");
-  const imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
-  maskPixels.forEach(p=>{
-    for(let i=-brushSize;i<=brushSize;i++){
-      for(let j=-brushSize;j<=brushSize;j++){
-        let xx=p.x+i,yy=p.y+j;
-        if(xx>=0&&xx<canvas.width&&yy>=0&&yy<canvas.height){
-          const idx=(yy*canvas.width+xx)*4;
-          imgData.data[idx+3]=0;
-        }
-      }
-    }
-  });
-  ctx.putImageData(imgData,0,0);
-  maskHistory.push(maskPixels.slice()); maskHistoryIndex=maskHistory.length-1;
-  maskPixels=[];
-  saveHistory();
-}
-function undoMask(){
-  if(maskHistoryIndex>=0){
-    maskHistoryIndex--;
-    ctx.drawImage(img,0,0,canvas.width,canvas.height);
-  }
-}
-
-/* --- Download --- */
-function downloadImage(){ let a=document.createElement('a'); a.download="ThanhBinh49-Pro.png"; a.href=canvas.toDataURL(); a.click(); }
-
-/* --- Text-to-Image & Chat AI Placeholder --- */
-function generateFromText(){ alert("Gemini / OpenAI cần server proxy để hoạt động"); }
-function sendChat(){ alert("Gemini / OpenAI cần server proxy để hoạt động"); }
-
 </script>
-
 </body>
 </html>
